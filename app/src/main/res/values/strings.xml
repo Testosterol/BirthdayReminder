@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Birthday Reminder</string>
+    <string name="add_reminder">Add reminder</string>
+    <string name="randomize">randomize</string>
+    <string name="birthday_date">Birthday date</string>
+    <string name="name">Name</string>
+    <string name="add_notification">Add notification</string>
+    <string-array name="notification_options">
+        <item>1 Month before</item>
+        <item>1 Week before</item>
+        <item>1 Day before</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+</resources>
