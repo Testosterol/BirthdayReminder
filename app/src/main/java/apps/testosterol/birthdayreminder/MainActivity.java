@@ -11,6 +11,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -32,7 +34,9 @@ import android.widget.RelativeLayout;
 
 import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements LifecycleOwner{
@@ -125,10 +129,23 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
         birthDay.setFocusable(false);
         birthDay.setClickable(true);
 
+
+
         addNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "HAHHAA");
+                RecyclerView rvContacts = dialog.findViewById(R.id.recyclerView);
+
+                ArrayList<Contact> contacts;
+                // Initialize contacts
+                contacts = Contact.createContactsList(20);
+                // Create adapter passing in the sample user data
+                ContactsAdapter adapter = new ContactsAdapter(contacts);
+                // Attach the adapter to the recyclerview to populate items
+                rvContacts.setAdapter(adapter);
+                // Set layout manager to position the items
+                rvContacts.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                // That's all!
             }
         });
         name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
