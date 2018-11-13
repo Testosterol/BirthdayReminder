@@ -1,42 +1,23 @@
 package apps.testosterol.birthdayreminder;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
-import java.security.Key;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements LifecycleOwner{
@@ -128,19 +109,19 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
 
         birthDay.setFocusable(false);
         birthDay.setClickable(true);
-
+        final RecyclerView rvContacts = dialog.findViewById(R.id.recyclerView);
 
 
         addNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RecyclerView rvContacts = dialog.findViewById(R.id.recyclerView);
 
-                ArrayList<Contact> contacts;
-                // Initialize contacts
-                contacts = Contact.createContactsList(20);
+                //rvContacts.setNestedScrollingEnabled(false);
+                ArrayList<Notification> notifications;
+                // Initialize notifications
+                notifications = Notification.createContactsList(10);
                 // Create adapter passing in the sample user data
-                ContactsAdapter adapter = new ContactsAdapter(contacts);
+                NotificationRecyclerViewAdapter adapter = new NotificationRecyclerViewAdapter(notifications);
                 // Attach the adapter to the recyclerview to populate items
                 rvContacts.setAdapter(adapter);
                 // Set layout manager to position the items
