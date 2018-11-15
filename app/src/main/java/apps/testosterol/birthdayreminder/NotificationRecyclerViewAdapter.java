@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.List;
 public class NotificationRecyclerViewAdapter extends
         RecyclerView.Adapter<NotificationRecyclerViewAdapter.ViewHolder> {
 
+    final private static String TAG = NotificationRecyclerViewAdapter.class.getSimpleName();
     // ... constructor and member variables
 
     // Usually involves inflating a layout from XML and returning the holder
@@ -37,36 +39,49 @@ public class NotificationRecyclerViewAdapter extends
     @Override
     public void onBindViewHolder(@NonNull NotificationRecyclerViewAdapter.ViewHolder viewHolder, int position) {
         // Get the data model based on position
-        Notification notification = mNotifications.get(position);
+        //Notification notification = mNotifications.get(position);
 
         // Set item views based on your views and data model
 
         FloatingActionButton mConfirmNotification = viewHolder.confirmNotification;
-        Spinner mRegularity = viewHolder.regularity;
-        EditText mNumberOfRegularity = viewHolder.numberOfRegularity;
-        CheckBox mEmailNotification = viewHolder.emailNotif;
+        final Spinner mRegularity = viewHolder.regularity;
+        final EditText mNumberOfRegularity = viewHolder.numberOfRegularity;
+        final CheckBox mEmailNotification = viewHolder.emailNotif;
 
       /*  TextView textView = viewHolder.nameTextView;
         textView.setText(notification.getName());
         Button button = viewHolder.messageButton;
         button.setText(notification.isOnline() ? "Message" : "Offline");
         button.setEnabled(notification.isOnline());
-    */}
+    */
+
+      mConfirmNotification.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+              Log.d(TAG, "Confirmation clicked");
+              Log.d(TAG, "Number inside the thingy : " + mNumberOfRegularity.getText());
+              Log.d(TAG, "Spinner choice : " + mRegularity.getSelectedItem().toString());
+              Log.d(TAG, "Check box is checked ? :" + mEmailNotification.isChecked());
+          }
+      });
+
+    }
 
     // Returns the total count of items in the list
     @Override
     public int getItemCount() {
-        return mNotifications.size();
+        return notif;
     }
 
     // ... view holder defined above...
 
     // Store a member variable for the contacts
     private List<Notification> mNotifications;
+    private int notif;
 
     // Pass in the contact array into the constructor
-    NotificationRecyclerViewAdapter(List<Notification> notifications) {
-        mNotifications = notifications;
+    NotificationRecyclerViewAdapter(int notifications) {
+        notif = notifications;
     }
 
     // Provide a direct reference to each of the views within a data item

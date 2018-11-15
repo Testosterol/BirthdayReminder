@@ -116,16 +116,22 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
             @Override
             public void onClick(View v) {
 
+                rvContacts.setScaleX(1f);
+                rvContacts.setScaleY(1f);
+                rvContacts.startAnimation(fab_open);
+
                 //rvContacts.setNestedScrollingEnabled(false);
                 ArrayList<Notification> notifications;
                 // Initialize notifications
                 notifications = Notification.createContactsList(10);
                 // Create adapter passing in the sample user data
-                NotificationRecyclerViewAdapter adapter = new NotificationRecyclerViewAdapter(notifications);
+                NotificationRecyclerViewAdapter adapter = new NotificationRecyclerViewAdapter(1);
                 // Attach the adapter to the recyclerview to populate items
                 rvContacts.setAdapter(adapter);
+
                 // Set layout manager to position the items
                 rvContacts.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
                 // That's all!
             }
         });
