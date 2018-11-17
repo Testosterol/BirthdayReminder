@@ -23,7 +23,7 @@
         android:text="@string/name"
         app:layout_constraintBottom_toTopOf="@+id/birthdaydate"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.045"
+        app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
@@ -71,7 +71,7 @@
         app:layout_constraintHorizontal_bias="0.333"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.88"
+        app:layout_constraintVertical_bias="1.0"
         app:maxImageSize="30dp"
         app:rippleColor="@color/colorAccent"
         app:srcCompat="@drawable/ic_add_white_28dp"
@@ -80,7 +80,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
-        android:layout_height="314dp"
+        android:layout_height="322dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -92,12 +92,12 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.919" />
+        app:layout_constraintVertical_bias="0.91" />
 
     <TextView
         android:id="@+id/notification_text"
         android:layout_width="wrap_content"
-        android:layout_height="18dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="208dp"
@@ -108,6 +108,6 @@
         app:layout_constraintHorizontal_bias="0.046"
         app:layout_constraintStart_toEndOf="@+id/Add"
         app:layout_constraintTop_toBottomOf="@+id/birthdaydate"
-        app:layout_constraintVertical_bias="0.031" />
+        app:layout_constraintVertical_bias="0.032" />
 
 </android.support.constraint.ConstraintLayout>

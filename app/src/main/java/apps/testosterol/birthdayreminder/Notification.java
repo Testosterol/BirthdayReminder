@@ -1,33 +1,32 @@
 package apps.testosterol.birthdayreminder;
 
-import java.util.ArrayList;
+import android.os.Build;
+import android.support.v7.widget.RecyclerView;
 
-public class Notification {
-    private String mName;
-    private boolean mOnline;
+import java.util.Date;
 
-    public Notification(String name, boolean online) {
-        mName = name;
-        mOnline = online;
+class Notification {
+
+    private String num, notificationDailyWeeklyMonthly, name;
+    private boolean isEmailNotification;
+    private Date date;
+
+    Notification(){}
+
+    Notification(String number, String notificationRegularity, boolean isEmail, String remindantName, Date birthdayDate){
+        this.num = number;
+        this.notificationDailyWeeklyMonthly = notificationRegularity;
+        this.isEmailNotification = isEmail;
+        this.date = birthdayDate;
+        this.name = remindantName;
     }
 
-    public String getName() {
-        return mName;
-    }
+    public void createNotification(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
 
-    public boolean isOnline() {
-        return mOnline;
-    }
+        }else{
 
-    private static int lastContactId = 0;
-
-    public static ArrayList<Notification> createContactsList(int numNotifications) {
-        ArrayList<Notification> notifications = new ArrayList<Notification>();
-
-        for (int i = 1; i <= numNotifications; i++) {
-            notifications.add(new Notification("Person " + ++lastContactId, i <= numNotifications / 2));
         }
-
-        return notifications;
     }
+
 }

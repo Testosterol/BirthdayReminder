@@ -1,20 +1,38 @@
 package apps.testosterol.birthdayreminder;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.arch.lifecycle.LifecycleOwner;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
+import android.widget.ViewAnimator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +49,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
     Dialog dialog;
     EditText birthDay, name;
     int mYear, mMonth, mDay;
+    RecyclerView mRecyclerView;
+    NotificationRecyclerViewAdapter mRecyclerAdapter;
+    ArrayList<Notification> myList = new ArrayList<>();
+
+    private static String dateOfNotification,nameOfNotification;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +65,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
         addReminder = findViewById(R.id.AddReminder);
         random = findViewById(R.id.RandomButton);
 
-
-
         addReminder.setVisibility(View.INVISIBLE);
         random.setVisibility(View.INVISIBLE);
 
         fab_open = AnimationUtils.loadAnimation(this, R.anim.add_open);
         fab_close = AnimationUtils.loadAnimation(this, R.anim.add_close);
-
 
         add.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,8 +119,34 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
     }
 
     private void inflateLayoutReminder() {
+        Log.d(TAG, "Add reminder");
+        final View dialogView = View.inflate(MainActivity.this ,R.layout.create_reminder_layout, null);
         dialog = new Dialog(MainActivity.this);
-        dialog.setContentView(R.layout.create_reminder_layout);
+        dialog.setContentView(dialogView);
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    int w = dialogView.getWidth();
+                    int h = dialogView.getHeight();
+
+                    int endRadius = (int) Math.hypot(w, h);
+
+                    int cx = (int) (addReminder.getX() + (addReminder.getWidth() / 2));
+                    int cy = (int) (addReminder.getY()) + addReminder.getHeight() + 56;
+
+                    Animator revealAnimator = null;
+
+                    revealAnimator = ViewAnimationUtils.createCircularReveal(dialogView, cx, cy, 0, endRadius);
+
+                    dialogView.setVisibility(View.VISIBLE);
+                    revealAnimator.setDuration(700);
+                    revealAnimator.start();
+                }
+            }
+        });
+
         dialog.show();
 
         birthDay = (dialog.findViewById(R.id.birthdaydate));
@@ -109,45 +155,48 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
 
         birthDay.setFocusable(false);
         birthDay.setClickable(true);
-        final RecyclerView rvContacts = dialog.findViewById(R.id.recyclerView);
 
+        myList.clear();
+
+        mRecyclerView = dialog.findViewById(R.id.recyclerView);
+        mRecyclerAdapter = new NotificationRecyclerViewAdapter(myList);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         addNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                rvContacts.setScaleX(1f);
-                rvContacts.setScaleY(1f);
-                rvContacts.startAnimation(fab_open);
-
-                //rvContacts.setNestedScrollingEnabled(false);
-                ArrayList<Notification> notifications;
-                // Initialize notifications
-                notifications = Notification.createContactsList(10);
-                // Create adapter passing in the sample user data
-                NotificationRecyclerViewAdapter adapter = new NotificationRecyclerViewAdapter(1);
-                // Attach the adapter to the recyclerview to populate items
-                rvContacts.setAdapter(adapter);
-
-                // Set layout manager to position the items
-                rvContacts.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
-                // That's all!
+                if(!birthDay.getText().toString().equals("Birthday date") && !birthDay.getText().toString().equals("")
+                && !name.getText().toString().equals("") && !name.getText().toString().equals("Name")) {
+                    Notification mLog = new Notification();
+                    myList.add(mLog);
+                    mRecyclerAdapter.notifyData(myList);
+                }else{
+                    Toast.makeText(MainActivity.this, "Please fill Birthday and Name first", Toast.LENGTH_LONG).show();
+                }
+                createNotification("","",true);
             }
         });
         name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+                Log.d(TAG, "Name edit click");
+                name.setText("");
                 if(!hasFocus){
                     final InputMethodManager imm = (InputMethodManager) getSystemService(MainActivity.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(name.getWindowToken(), 0);
                     name.clearFocus();
                 }
+                saveName(name.getText().toString());
             }
         });
         birthDay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                birthDay.setText("");
+                Log.d(TAG, "Birthday edit click");
                 final Calendar c = Calendar.getInstance();
                 mYear = c.get(Calendar.YEAR);
                 mMonth = c.get(Calendar.MONTH);
@@ -160,10 +209,48 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                                                   int monthOfYear, int dayOfMonth) {
                                 String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", dayOfMonth, (monthOfYear + 1),year );
                                 birthDay.setText(formattedDate);
+                                saveBirthday(formattedDate);
+                                createNotification("","",true);
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
+
             }
         });
     }
+    public void saveName(String name){
+        nameOfNotification = name;
+    }
+
+    public void saveBirthday(String date){
+        dateOfNotification = date;
+    }
+
+    public String getNameOfNotification(){
+        return nameOfNotification;
+    }
+    public String getBirthdayOfNotification(){
+        return dateOfNotification;
+    }
+
+    public void createNotification(String numOfDaysWeeksMonths, String notificationDailyWeeklyMonthly,
+                                   boolean isEmailNotification) {
+
+        //put shit into internal db...
+
+        boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE) == null);
+
+        if (alarm) {
+            Intent itAlarm = new Intent("ALARM");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, itAlarm, 0);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.add(Calendar.SECOND, 3);
+
+
+            AlarmManager alarme = (AlarmManager) getSystemService(ALARM_SERVICE);
+            alarme.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 60000, pendingIntent);
+        }
+    }
+
 }

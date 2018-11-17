@@ -1,110 +1,139 @@
 package apps.testosterol.birthdayreminder;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import java.util.List;
+import java.util.ArrayList;
 
 
-public class NotificationRecyclerViewAdapter extends
-        RecyclerView.Adapter<NotificationRecyclerViewAdapter.ViewHolder> {
 
-    final private static String TAG = NotificationRecyclerViewAdapter.class.getSimpleName();
-    // ... constructor and member variables
+public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<NotificationRecyclerViewAdapter.RecyclerItemViewHolder> {
+    private ArrayList<Notification> myList;
 
-    // Usually involves inflating a layout from XML and returning the holder
+
+
+    NotificationRecyclerViewAdapter(ArrayList<Notification> myList) {
+        this.myList = myList;
+    }
     @NonNull
-    @Override
-    public NotificationRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
-        // Inflate the custom layout
         View contactView = inflater.inflate(R.layout.recycler_view_items, parent, false);
-
-        // Return a new holder instance
-        return new ViewHolder(contactView);
+        return new RecyclerItemViewHolder(contactView);
     }
 
-    // Involves populating data into the item through holder
     @Override
-    public void onBindViewHolder(@NonNull NotificationRecyclerViewAdapter.ViewHolder viewHolder, int position) {
-        // Get the data model based on position
-        //Notification notification = mNotifications.get(position);
-
-        // Set item views based on your views and data model
-
-        FloatingActionButton mConfirmNotification = viewHolder.confirmNotification;
-        final Spinner mRegularity = viewHolder.regularity;
-        final EditText mNumberOfRegularity = viewHolder.numberOfRegularity;
-        final CheckBox mEmailNotification = viewHolder.emailNotif;
-
-      /*  TextView textView = viewHolder.nameTextView;
-        textView.setText(notification.getName());
-        Button button = viewHolder.messageButton;
-        button.setText(notification.isOnline() ? "Message" : "Offline");
-        button.setEnabled(notification.isOnline());
-    */
-
-      mConfirmNotification.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              Log.d(TAG, "Confirmation clicked");
-              Log.d(TAG, "Number inside the thingy : " + mNumberOfRegularity.getText());
-              Log.d(TAG, "Spinner choice : " + mRegularity.getSelectedItem().toString());
-              Log.d(TAG, "Check box is checked ? :" + mEmailNotification.isChecked());
-          }
-      });
-
+    public void onBindViewHolder(@NonNull RecyclerItemViewHolder holder, @SuppressLint("RecyclerView") final int position) {
+        Log.d("onBindViewHoler ", myList.size() + "");
     }
-
-    // Returns the total count of items in the list
     @Override
     public int getItemCount() {
-        return notif;
+        return(null != myList?myList.size():0);
     }
-
-    // ... view holder defined above...
-
-    // Store a member variable for the contacts
-    private List<Notification> mNotifications;
-    private int notif;
-
-    // Pass in the contact array into the constructor
-    NotificationRecyclerViewAdapter(int notifications) {
-        notif = notifications;
+    void notifyData(ArrayList<Notification> myList) {
+        Log.d("notifyData ", myList.size() + "");
+        this.myList = myList;
+        notifyDataSetChanged();
     }
+    class RecyclerItemViewHolder extends RecyclerView.ViewHolder {
 
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
-    class ViewHolder extends RecyclerView.ViewHolder {
-        // Your holder should contain a member variable
-        // for any view that will be set as you render a row
-        CheckBox emailNotif;
-        EditText numberOfRegularity;
-        Spinner regularity;
-        FloatingActionButton confirmNotification;
+        EditText regularityNotification;
+        Spinner notificationChoose;
+        FloatingActionButton confirmNotification, cancelNotification;
+        CheckBox emailNotification;
 
-        // We also create a constructor that accepts the entire item row
-        // and does the view lookups to find each subview
-        ViewHolder(View itemView) {
-            // Stores the itemView in a public final member variable that can be used
-            // to access the context from any ViewHolder instance.
-            super(itemView);
+        Animation fab_open, fab_close;
 
-            emailNotif = itemView.findViewById(R.id.email_notification);
-            numberOfRegularity =  itemView.findViewById(R.id.regularity_notification);
-            regularity = itemView.findViewById(R.id.notification_choose);
-            confirmNotification =  itemView.findViewById(R.id.confirm_notification);
+        private ConstraintLayout constraingNotification;
+
+        RecyclerItemViewHolder(final View parent) {
+            super(parent);
+
+            fab_open = AnimationUtils.loadAnimation(parent.getContext(), R.anim.add_open);
+            fab_close = AnimationUtils.loadAnimation(parent.getContext(), R.anim.add_close);
+
+            regularityNotification = parent.findViewById(R.id.regularity_notification);
+            notificationChoose = parent.findViewById(R.id.notification_choose);
+            confirmNotification = parent.findViewById(R.id.confirm_notification);
+            cancelNotification = parent.findViewById(R.id.cancel_notification);
+            emailNotification = parent.findViewById(R.id.email_notification);
+            constraingNotification =  parent.findViewById(R.id.constraingNotification);
+
+            constraingNotification.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Toast.makeText(itemView.getContext(), "Position:" + Integer.toString(getPosition()), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            confirmNotification.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    saveNotification();
+                }
+            });
+
+
+
         }
+
+
+        @SuppressLint("RestrictedApi")
+        void saveNotification(){
+
+            String num = regularityNotification.getText().toString();
+            String notificationDailyWeeklyMonthly = notificationChoose.getSelectedItem().toString();
+            boolean isEmailNotification = false;
+            if(emailNotification.isChecked()){
+                isEmailNotification = true;
+            }
+
+           /* MainActivity karol = new MainActivity();
+            karol.createNotification(num,notificationDailyWeeklyMonthly,isEmailNotification );*/
+            //otification notification = new Notification(num, notificationDailyWeeklyMonthly, isEmailNotification);
+
+            confirmNotification.setScaleX(1f);
+            confirmNotification.setScaleY(1f);
+            confirmNotification.startAnimation(fab_close);
+            confirmNotification.setClickable(false);
+            confirmNotification.setVisibility(View.INVISIBLE);
+
+            cancelNotification.setScaleX(1f);
+            cancelNotification.setScaleY(1f);
+            cancelNotification.startAnimation(fab_open);
+            cancelNotification.setClickable(true);
+            cancelNotification.setVisibility(View.VISIBLE);
+
+
+            cancelNotification.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    cancelNotification.setClickable(false);
+                    cancelNotification.setVisibility(View.INVISIBLE);
+
+                    confirmNotification.setClickable(true);
+                    confirmNotification.setVisibility(View.VISIBLE);
+
+                    myList.remove(getAdapterPosition());
+                    notifyItemRemoved(getAdapterPosition());
+                }
+            });
+        }
+
     }
 }
