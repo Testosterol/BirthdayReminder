@@ -17,11 +17,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
-
+import java.util.Date;
 
 
 public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<NotificationRecyclerViewAdapter.RecyclerItemViewHolder> {
     private ArrayList<Notification> myList;
+    private String mDate;
+    private String mName;
 
 
 
@@ -45,9 +47,11 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
     public int getItemCount() {
         return(null != myList?myList.size():0);
     }
-    void notifyData(ArrayList<Notification> myList) {
-        Log.d("notifyData ", myList.size() + "");
+    void notifyData(ArrayList<Notification> myList, String birthdayDate, String name) {
+        Log.d("notifyData ", myList.size() + " Birthday date: " + birthdayDate + " name: " + name);
         this.myList = myList;
+        this.mDate = birthdayDate;
+        this.mName = name;
         notifyDataSetChanged();
     }
     class RecyclerItemViewHolder extends RecyclerView.ViewHolder {
@@ -103,6 +107,8 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
                 isEmailNotification = true;
             }
 
+            new MainActivity().createNotification(num, notificationDailyWeeklyMonthly
+            , isEmailNotification, mName , mDate);
            /* MainActivity karol = new MainActivity();
             karol.createNotification(num,notificationDailyWeeklyMonthly,isEmailNotification );*/
             //otification notification = new Notification(num, notificationDailyWeeklyMonthly, isEmailNotification);

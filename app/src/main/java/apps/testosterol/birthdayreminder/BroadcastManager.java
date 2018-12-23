@@ -28,6 +28,7 @@ public class BroadcastManager extends BroadcastReceiver {
 
     public void createNotification(Context context, Intent intent, CharSequence ticker, CharSequence title, CharSequence descricao){
         //create notification
+        Log.d("TESTNOTIFICATION", "Birthday edit click");
         Intent notificationIntent = new Intent();
         PendingIntent contentIntent = PendingIntent.getActivity(context,0, notificationIntent, 0);
 

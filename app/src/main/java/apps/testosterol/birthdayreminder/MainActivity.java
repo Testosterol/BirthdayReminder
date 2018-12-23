@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
     Dialog dialog;
     EditText birthDay, name;
     int mYear, mMonth, mDay;
+    int saveYear, saveMonth, saveDay;
     RecyclerView mRecyclerView;
     NotificationRecyclerViewAdapter mRecyclerAdapter;
     ArrayList<Notification> myList = new ArrayList<>();
@@ -172,11 +173,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                 && !name.getText().toString().equals("") && !name.getText().toString().equals("Name")) {
                     Notification mLog = new Notification();
                     myList.add(mLog);
-                    mRecyclerAdapter.notifyData(myList);
+                    mRecyclerAdapter.notifyData(myList, getBirthdayOfNotification(), getNameOfNotification());
                 }else{
                     Toast.makeText(MainActivity.this, "Please fill Birthday and Name first", Toast.LENGTH_LONG).show();
                 }
-                createNotification("","",true);
+                //createNotification("","",true, "", "");
             }
         });
         name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -210,7 +211,9 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                                 String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", dayOfMonth, (monthOfYear + 1),year );
                                 birthDay.setText(formattedDate);
                                 saveBirthday(formattedDate);
-                                createNotification("","",true);
+                                saveYear(year);
+                                saveMonth(monthOfYear);
+                                saveDay(dayOfMonth);
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
@@ -218,38 +221,74 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
             }
         });
     }
+
+    public void saveYear(int year){ saveYear = year; }
+    public void saveMonth(int month){ saveMonth = month; }
+    public void saveDay(int day){ saveDay = day; }
+    public int getYear(){ return saveYear; }
+    public int getMonth(){ return saveMonth; }
+    public int getDay(){ return saveDay; }
+
     public void saveName(String name){
         nameOfNotification = name;
     }
-
     public void saveBirthday(String date){
         dateOfNotification = date;
     }
-
     public String getNameOfNotification(){
         return nameOfNotification;
     }
-    public String getBirthdayOfNotification(){
-        return dateOfNotification;
-    }
+    public String getBirthdayOfNotification(){ return dateOfNotification;}
 
     public void createNotification(String numOfDaysWeeksMonths, String notificationDailyWeeklyMonthly,
-                                   boolean isEmailNotification) {
+                                   boolean isEmailNotification, String name, String BirthdayDate) {
 
         //put shit into internal db...
 
-        boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE) == null);
+        //calculate difference between birthday day and days/months/weeks before
+        //add it to the calendar
+
+        // birthday date 15-10-2019
+        // numOfDaysWeeksMonths
+        int numSubstract;
+
+        //check if year is negative / older
+
+        Calendar karol = Calendar.getInstance();
+        karol.setTimeInMillis(System.currentTimeMillis());
+        if(getYear() < karol.get(Calendar.YEAR)){
+            saveYear(getYear() + 1);
+        }
+        karol.set(getDay(), getMonth(), getYear());
+        switch (notificationDailyWeeklyMonthly) {
+            case "Days":
+                numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
+                karol.add(Calendar.DAY_OF_YEAR, -numSubstract);
+                break;
+            case "Weeks":
+                numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
+                karol.add(Calendar.WEEK_OF_YEAR, -numSubstract);
+                break;
+            case "Months":
+                numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
+                karol.add(Calendar.MONTH, -numSubstract);
+                break;
+        }
+
+        boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE)   == null);
 
         if (alarm) {
             Intent itAlarm = new Intent("ALARM");
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, itAlarm, 0);
+
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
             calendar.add(Calendar.SECOND, 3);
 
+            Log.d("TESTDATE", "birthday date :" + getBirthdayOfNotification() + " calendar date + 3seconds: " + calendar );
 
             AlarmManager alarme = (AlarmManager) getSystemService(ALARM_SERVICE);
-            alarme.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 60000, pendingIntent);
+            alarme.setRepeating(AlarmManager.RTC_WAKEUP, karol.getTimeInMillis(), 60000, pendingIntent);
         }
     }
 
