@@ -16,6 +16,8 @@
         android:layout_marginBottom="8dp"
         android:autofillHints=""
         android:ems="10"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:inputType="textPersonName"
         android:labelFor="@id/name"
         android:text="@string/name"
@@ -24,10 +26,8 @@
         app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.822"
-        tools:targetApi="o"
-        android:focusable="true"
-        android:focusableInTouchMode ="true"/>
+        app:layout_constraintVertical_bias="1.0"
+        tools:targetApi="o" />
 
     <EditText
         android:id="@+id/birthdaydate"
@@ -66,12 +66,12 @@
         android:translationZ="4dp"
         app:backgroundTint="@color/colorAccent"
         app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
         app:layout_constraintEnd_toStartOf="@+id/notification_text"
-        app:layout_constraintHorizontal_bias="0.32"
+        app:layout_constraintHorizontal_bias="0.333"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.283"
+        app:layout_constraintVertical_bias="1.0"
         app:maxImageSize="30dp"
         app:rippleColor="@color/colorAccent"
         app:srcCompat="@drawable/ic_add_white_28dp"
@@ -79,14 +79,20 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="368dp"
-        android:layout_height="304dp"
+        android:layout_width="0dp"
+        android:layout_height="322dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.91" />
 
     <TextView
         android:id="@+id/notification_text"
@@ -94,14 +100,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="204dp"
+        android:layout_marginEnd="208dp"
         android:layout_marginBottom="8dp"
         android:text="@string/add_notification"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.046"
         app:layout_constraintStart_toEndOf="@+id/Add"
         app:layout_constraintTop_toBottomOf="@+id/birthdaydate"
-        app:layout_constraintVertical_bias="0.243" />
+        app:layout_constraintVertical_bias="0.032" />
 
 </android.support.constraint.ConstraintLayout>
