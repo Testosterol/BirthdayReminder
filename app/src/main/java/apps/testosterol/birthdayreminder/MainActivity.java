@@ -37,6 +37,11 @@ import android.widget.ViewAnimator;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import apps.testosterol.birthdayreminder.SchedulingService.ConfigWorker;
 
 public class MainActivity extends AppCompatActivity implements LifecycleOwner{
 
@@ -137,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                     int cx = (int) (addReminder.getX() + (addReminder.getWidth() / 2));
                     int cy = (int) (addReminder.getY()) + addReminder.getHeight() + 56;
 
-                    Animator revealAnimator = null;
+                    Animator revealAnimator;
 
                     revealAnimator = ViewAnimationUtils.createCircularReveal(dialogView, cx, cy, 0, endRadius);
 
@@ -187,7 +192,9 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                 name.setText("");
                 if(!hasFocus){
                     final InputMethodManager imm = (InputMethodManager) getSystemService(MainActivity.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(name.getWindowToken(), 0);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(name.getWindowToken(), 0);
+                    }
                     name.clearFocus();
                 }
                 saveName(name.getText().toString());
@@ -256,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
 
         Calendar karol = Calendar.getInstance();
         karol.setTimeInMillis(System.currentTimeMillis());
-        if(getYear() < karol.get(Calendar.YEAR)){
+        if (getYear() < karol.get(Calendar.YEAR)) {
             saveYear(getYear() + 1);
         }
         karol.set(getDay(), getMonth(), getYear());
@@ -275,7 +282,10 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                 break;
         }
 
-        boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE)   == null);
+        Log.d("TESTKAROL", "time :" + karol.getTimeInMillis() + " String numOfDaysWeeksMonths: " + numOfDaysWeeksMonths + " Birthday date : " + BirthdayDate);
+
+
+       /* boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE)   == null);
 
         if (alarm) {
             Intent itAlarm = new Intent("ALARM");
@@ -290,6 +300,22 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
             AlarmManager alarme = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarme.setRepeating(AlarmManager.RTC_WAKEUP, karol.getTimeInMillis(), 60000, pendingIntent);
         }
+    }*/
     }
+
+
+    /**
+     * Method to start workmanager to schedule flush of initial config.
+     *
+     * @param timeInSeconds , given time when the background work should be executed.
+     */
+    public static void startWorkerInitConfig(long timeInSeconds){
+        OneTimeWorkRequest oneTimeDispatch = new OneTimeWorkRequest.Builder(ConfigWorker.class)
+                .setInitialDelay(timeInSeconds, TimeUnit.SECONDS) // run just one time at this time
+                .addTag("notification")
+                .build();
+        WorkManager.getInstance().enqueue(oneTimeDispatch);
+    }
+
 
 }
