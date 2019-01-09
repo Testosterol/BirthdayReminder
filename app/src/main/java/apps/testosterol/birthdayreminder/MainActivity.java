@@ -179,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                     Notification mLog = new Notification();
                     myList.add(mLog);
                     mRecyclerAdapter.notifyData(myList, getBirthdayOfNotification(), getNameOfNotification());
+                   // mRecyclerAdapter.notifyDataSetChanged();
                 }else{
                     Toast.makeText(MainActivity.this, "Please fill Birthday and Name first", Toast.LENGTH_LONG).show();
                 }
@@ -189,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 Log.d(TAG, "Name edit click");
-                name.setText("");
+                //name.setText("");
                 if(!hasFocus){
                     final InputMethodManager imm = (InputMethodManager) getSystemService(MainActivity.INPUT_METHOD_SERVICE);
                     if (imm != null) {

@@ -47,12 +47,14 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
     public int getItemCount() {
         return(null != myList?myList.size():0);
     }
+
     void notifyData(ArrayList<Notification> myList, String birthdayDate, String name) {
         Log.d("notifyData ", myList.size() + " Birthday date: " + birthdayDate + " name: " + name);
         this.myList = myList;
         this.mDate = birthdayDate;
         this.mName = name;
-        notifyDataSetChanged();
+        //notifyDataSetChanged();
+        notifyItemInserted(0);
     }
     class RecyclerItemViewHolder extends RecyclerView.ViewHolder {
 
