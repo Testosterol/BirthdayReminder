@@ -34,8 +34,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -256,35 +260,51 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
         //calculate difference between birthday day and days/months/weeks before
         //add it to the calendar
 
+        String date[] = BirthdayDate.split("-");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Integer.parseInt(date[2]), Integer.parseInt(date[1]), Integer.parseInt(date[0]));
+
         // birthday date 15-10-2019
         // numOfDaysWeeksMonths
         int numSubstract;
 
         //check if year is negative / older
-
-        Calendar karol = Calendar.getInstance();
-        karol.setTimeInMillis(System.currentTimeMillis());
-        if (getYear() < karol.get(Calendar.YEAR)) {
-            saveYear(getYear() + 1);
-        }
-        karol.set(getDay(), getMonth(), getYear());
         switch (notificationDailyWeeklyMonthly) {
             case "Days":
                 numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                karol.add(Calendar.DAY_OF_YEAR, -numSubstract);
+                Log.d("TESTKAROL", "days substracted - : " + numSubstract);
+                Log.d("TESTKAROL", "days - : " + calendar.get(Calendar.DAY_OF_YEAR));
+                calendar.add(Calendar.DAY_OF_YEAR, -numSubstract);
                 break;
             case "Weeks":
                 numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                karol.add(Calendar.WEEK_OF_YEAR, -numSubstract);
+                numSubstract *= 7;
+                Log.d("TESTKAROL", "weeks-days substracted - : " + numSubstract);
+                calendar.add(Calendar.DAY_OF_YEAR, -numSubstract);
                 break;
             case "Months":
                 numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                karol.add(Calendar.MONTH, -numSubstract);
+                Log.d("TESTKAROL", "months substracted - : " + numSubstract);
+                calendar.add(Calendar.MONTH, -numSubstract);
                 break;
         }
 
-        Log.d("TESTKAROL", "time :" + karol.getTimeInMillis() + " String numOfDaysWeeksMonths: " + numOfDaysWeeksMonths + " Birthday date : " + BirthdayDate);
+        //Log.d("TESTKAROL", "time :" + calendar.getTimeInMillis() + " String numOfDaysWeeksMonths: " + numOfDaysWeeksMonths + " Birthday date : " + BirthdayDate);
 
+        int newDay = calendar.get(Calendar.DAY_OF_YEAR);
+        int newWeek = calendar.get(Calendar.WEEK_OF_YEAR);
+        int newMonth = calendar.get(Calendar.MONTH);
+        int newYear = calendar.get(Calendar.YEAR);
+
+        calendar.getTime();
+        SimpleDateFormat ft = new SimpleDateFormat("MM-dd-YYYY");
+        ft.format(calendar);
+
+     /*   Date d1 = new Date(year, month, day);
+        System.out.println("Date : " + d1.getDate() + "/" +d1.getMonth() + "/" + d1.getYear());*/
+
+
+        Log.d("TESTKAROL", "day :" + newDay + " month :" + newMonth + " year: " + newYear + " DATE: " + ft);
 
        /* boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE)   == null);
 
@@ -308,11 +328,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
     /**
      * Method to start workmanager to schedule flush of initial config.
      *
-     * @param timeInSeconds , given time when the background work should be executed.
+     * @param timeInDays , given time when the background work should be executed.
      */
-    public static void startWorkerInitConfig(long timeInSeconds){
+    public static void startWorkerInitConfig(long timeInDays){
         OneTimeWorkRequest oneTimeDispatch = new OneTimeWorkRequest.Builder(ConfigWorker.class)
-                .setInitialDelay(timeInSeconds, TimeUnit.SECONDS) // run just one time at this time
+                .setInitialDelay(timeInDays, TimeUnit.DAYS) // run just one time at this time
                 .addTag("notification")
                 .build();
         WorkManager.getInstance().enqueue(oneTimeDispatch);
