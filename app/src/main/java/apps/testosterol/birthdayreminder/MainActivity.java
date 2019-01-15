@@ -34,6 +34,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -50,6 +51,7 @@ import apps.testosterol.birthdayreminder.SchedulingService.ConfigWorker;
 public class MainActivity extends AppCompatActivity implements LifecycleOwner{
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String CHANNEL_ID = "1";
 
     Button addReminder, random;
     Animation fab_open, fab_close;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getLifecycle().addObserver(LifecycleTracker.getInstance());
+        createNotificationChannel();
 
         add = findViewById(R.id.Add);
         addReminder = findViewById(R.id.AddReminder);
@@ -223,9 +226,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                                 String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", dayOfMonth, (monthOfYear + 1),year );
                                 birthDay.setText(formattedDate);
                                 saveBirthday(formattedDate);
-                                saveYear(year);
-                                saveMonth(monthOfYear);
-                                saveDay(dayOfMonth);
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
@@ -233,13 +233,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
             }
         });
     }
-
-    public void saveYear(int year){ saveYear = year; }
-    public void saveMonth(int month){ saveMonth = month; }
-    public void saveDay(int day){ saveDay = day; }
-    public int getYear(){ return saveYear; }
-    public int getMonth(){ return saveMonth; }
-    public int getDay(){ return saveDay; }
 
     public void saveName(String name){
         nameOfNotification = name;
@@ -261,67 +254,91 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
         //add it to the calendar
 
         String date[] = BirthdayDate.split("-");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Integer.parseInt(date[2]), Integer.parseInt(date[1]), Integer.parseInt(date[0]));
 
-        // birthday date 15-10-2019
-        // numOfDaysWeeksMonths
+        Calendar dateOfNotification = Calendar.getInstance();
+        
+        if(Integer.parseInt(date[2]) < dateOfNotification.get(Calendar.YEAR)) {
+            date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+        }
+        if((Integer.parseInt(date[1]) - 1) < dateOfNotification.get(Calendar.MONTH)){
+            date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+            dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+        }else{
+            if ((Integer.parseInt(date[1]) - 1) == dateOfNotification.get(Calendar.MONTH) && Integer.parseInt(date[0]) < dateOfNotification.get(Calendar.DAY_OF_YEAR)) {
+                date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+                dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+            }else{
+                dateOfNotification.set((Integer.parseInt(date[2])), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+            }
+        }
+
         int numSubstract;
-
-        //check if year is negative / older
         switch (notificationDailyWeeklyMonthly) {
             case "Days":
-                numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                Log.d("TESTKAROL", "days substracted - : " + numSubstract);
-                Log.d("TESTKAROL", "days - : " + calendar.get(Calendar.DAY_OF_YEAR));
-                calendar.add(Calendar.DAY_OF_YEAR, -numSubstract);
+                if(numOfDaysWeeksMonths != null) {
+                    numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
+                    dateOfNotification.add(Calendar.DAY_OF_YEAR, -numSubstract);
+                }
                 break;
             case "Weeks":
-                numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                numSubstract *= 7;
-                Log.d("TESTKAROL", "weeks-days substracted - : " + numSubstract);
-                calendar.add(Calendar.DAY_OF_YEAR, -numSubstract);
+                if(numOfDaysWeeksMonths != null) {
+                    numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
+                    numSubstract *= 7;
+                    dateOfNotification.add(Calendar.DAY_OF_YEAR, -numSubstract);
+                }
                 break;
             case "Months":
-                numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                Log.d("TESTKAROL", "months substracted - : " + numSubstract);
-                calendar.add(Calendar.MONTH, -numSubstract);
+                if(numOfDaysWeeksMonths != null) {
+                    numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
+                    dateOfNotification.add(Calendar.MONTH, -numSubstract);
+                }
                 break;
         }
-
-        //Log.d("TESTKAROL", "time :" + calendar.getTimeInMillis() + " String numOfDaysWeeksMonths: " + numOfDaysWeeksMonths + " Birthday date : " + BirthdayDate);
-
-        int newDay = calendar.get(Calendar.DAY_OF_YEAR);
-        int newWeek = calendar.get(Calendar.WEEK_OF_YEAR);
-        int newMonth = calendar.get(Calendar.MONTH);
-        int newYear = calendar.get(Calendar.YEAR);
-
-        calendar.getTime();
-        SimpleDateFormat ft = new SimpleDateFormat("MM-dd-YYYY");
-        ft.format(calendar);
-
-     /*   Date d1 = new Date(year, month, day);
-        System.out.println("Date : " + d1.getDate() + "/" +d1.getMonth() + "/" + d1.getYear());*/
-
-
-        Log.d("TESTKAROL", "day :" + newDay + " month :" + newMonth + " year: " + newYear + " DATE: " + ft);
-
-       /* boolean alarm = (PendingIntent.getBroadcast(this, 0, new Intent("ALARM"), PendingIntent.FLAG_NO_CREATE)   == null);
-
-        if (alarm) {
-            Intent itAlarm = new Intent("ALARM");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, itAlarm, 0);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.add(Calendar.SECOND, 3);
-
-            Log.d("TESTDATE", "birthday date :" + getBirthdayOfNotification() + " calendar date + 3seconds: " + calendar );
-
-            AlarmManager alarme = (AlarmManager) getSystemService(ALARM_SERVICE);
-            alarme.setRepeating(AlarmManager.RTC_WAKEUP, karol.getTimeInMillis(), 60000, pendingIntent);
+        
+        Calendar calendar = Calendar.getInstance();
+        
+        if(calendar.get(Calendar.YEAR) > dateOfNotification.get(Calendar.YEAR)) {
+            dateOfNotification.set (Calendar.YEAR, calendar.get(Calendar.YEAR));
         }
-    }*/
+        if(calendar.get(Calendar.MONTH) > dateOfNotification.get(Calendar.MONTH)){
+            dateOfNotification.set (Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
+        }else{
+            if ((calendar.get(Calendar.MONTH) == dateOfNotification.get(Calendar.MONTH) && (calendar.get(Calendar.DAY_OF_YEAR) > dateOfNotification.get(Calendar.DAY_OF_YEAR)))) {
+                dateOfNotification.set (Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
+            }
+        }
+        
+        Calendar todayDate = Calendar.getInstance();
+
+        long dateOfNotificationMillis = dateOfNotification.getTimeInMillis();
+        long todayDateMillis = todayDate.getTimeInMillis();
+        long dateDifferenceInMillis = dateOfNotificationMillis - todayDateMillis;
+        long notificationDelayInDays = TimeUnit.DAYS.convert(dateDifferenceInMillis, TimeUnit.MILLISECONDS);
+        
+        // add this to work manager as delay - alebo nastav alarm o tolko dni neskor
+        notificationDelayInDays += 1;
+
+        startWorkerInitConfig(notificationDelayInDays);
+
+
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
     }
 
 
@@ -336,6 +353,8 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                 .addTag("notification")
                 .build();
         WorkManager.getInstance().enqueue(oneTimeDispatch);
+        WorkManager.getInstance().enqueueUniqueWork()
+        WorkManager.getInstance().cancelWorkById();
     }
 
 

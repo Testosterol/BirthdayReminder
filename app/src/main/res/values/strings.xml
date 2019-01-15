@@ -7,6 +7,8 @@
     <string name="add_notification">Add notification</string>
     <string name="_1">1</string>
     <string name="e_mail">E-mail</string>
+    <string name="channel_name">Notification</string>
+    <string name="channel_description">Notification channel</string>
     <string-array name="notification_options">
         <item>1 Month before</item>
         <item>1 Week before</item>
