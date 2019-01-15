@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -321,6 +322,12 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
         startWorkerInitConfig(notificationDelayInDays);
 
 
+        //generate email if clicked ?
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                "mailto","abc@gmail.com", null));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Body");
+        startActivity(Intent.createChooser(emailIntent, "Send email..."));
     }
 
     private void createNotificationChannel() {
@@ -353,8 +360,11 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner{
                 .addTag("notification")
                 .build();
         WorkManager.getInstance().enqueue(oneTimeDispatch);
-        WorkManager.getInstance().enqueueUniqueWork()
-        WorkManager.getInstance().cancelWorkById();
+
+        // TODO: FIGURE OUT CANCELLING SPECIFIC WORK
+
+     /*   WorkManager.getInstance().enqueueUniqueWork()
+        WorkManager.getInstance().cancelWorkById();*/
     }
 
 
