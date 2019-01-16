@@ -1,17 +1,20 @@
-package apps.testosterol.birthdayreminder;
+package apps.testosterol.birthdayreminder.Notification;
 
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.Date;
 
-class Notification {
+ public class Notification {
 
     private String num, notificationDailyWeeklyMonthly, name;
     private boolean isEmailNotification;
     private Date date;
 
-    Notification(){}
+    String image;
+    String phone;
+
+    public Notification(){}
 
     Notification(String number, String notificationRegularity, boolean isEmail, String remindantName, Date birthdayDate){
         this.num = number;
@@ -27,6 +30,27 @@ class Notification {
         }else{
 
         }
+    }
+
+
+     public void setName(String name) {
+         this.name = name;
+     }
+
+     public void setImage(String image){this.image = image;}
+
+     public void setPhone(String phone) {this.phone = phone;}
+
+    public String getName() {
+        return name;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 
 }

@@ -101,7 +101,8 @@
         app:maxImageSize="30dp"
         app:rippleColor="@color/colorAccent"
         app:srcCompat="@drawable/ic_add_white_28dp"
-        app:useCompatPadding="false" />
+        app:useCompatPadding="false"
+        tools:ignore="VectorDrawableCompat" />
 
     <TextView
         android:id="@+id/notification_text"

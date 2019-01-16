@@ -17,7 +17,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
-import java.util.Date;
+
+import apps.testosterol.birthdayreminder.Notification.Notification;
 
 
 public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<NotificationRecyclerViewAdapter.RecyclerItemViewHolder> {

@@ -1,4 +1,4 @@
-package apps.testosterol.birthdayreminder.util;
+package apps.testosterol.birthdayreminder.Util;
 
 public class NetworkInfo {
 

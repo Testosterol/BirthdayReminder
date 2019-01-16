@@ -1,4 +1,4 @@
-package apps.testosterol.birthdayreminder.database;
+package apps.testosterol.birthdayreminder.Database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONArray;
