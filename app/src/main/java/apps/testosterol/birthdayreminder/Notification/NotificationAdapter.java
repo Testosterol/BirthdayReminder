@@ -1,8 +1,12 @@
 package apps.testosterol.birthdayreminder.Notification;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +14,8 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Filter;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,13 +34,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private NotificationsAdapterListener listener;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView name, phone;
+        public TextView name, birthdayDate, notificationDate;
         public ImageView thumbnail;
 
         public MyViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.name);
-            phone = view.findViewById(R.id.phone);
+            birthdayDate = view.findViewById(R.id.birthday);
+            notificationDate = view.findViewById(R.id.notification_date);
             thumbnail = view.findViewById(R.id.thumbnail);
 
             view.setOnClickListener(new View.OnClickListener() {
@@ -42,6 +49,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 public void onClick(View view) {
                     // send selected notification in callback
                     listener.onNotificationSelected(notificationListFiltered.get(getAdapterPosition()));
+                    Intent intent = new Intent(context, NotificationActivity.class);
+                    context.startActivity(intent);
                 }
             });
         }
@@ -68,10 +77,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
         final Notification notification = notificationListFiltered.get(position);
         holder.name.setText(notification.getName());
-        holder.phone.setText(notification.getPhone());
+        holder.birthdayDate.setText(String.format("%s%s%s", context.getString(R.string.Birthday),": ", notification.getBirthday()));
+        holder.notificationDate.setText(String.format("%s%s%s",context.getString(R.string.NotificationDatenotification), ": ", notification.getNotificationDate()));
+
+        byte[] imageByteArray = Base64.decode(notification.getImage(), Base64.DEFAULT);
 
         Glide.with(context)
-                .load(notification.getImage())
+                .load(imageByteArray)
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.thumbnail);
     }
@@ -94,8 +106,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     for (Notification row : notificationList) {
 
                         // name match condition. this might differ depending on your requirement
-                        // here we are looking for name or phone number match
-                        if (row.getName().toLowerCase().contains(charString.toLowerCase()) || row.getPhone().contains(charSequence)) {
+                        // here we are looking for name or birthdayDate number match
+                        if (row.getName().toLowerCase().contains(charString.toLowerCase()) || row.getBirthday().contains(charSequence)) {
                             filteredList.add(row);
                         }
                     }

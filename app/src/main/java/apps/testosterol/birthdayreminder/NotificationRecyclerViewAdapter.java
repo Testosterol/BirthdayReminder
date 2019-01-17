@@ -2,10 +2,16 @@ package apps.testosterol.birthdayreminder;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,22 +20,36 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
+import apps.testosterol.birthdayreminder.Database.DatabaseStats;
 import apps.testosterol.birthdayreminder.Notification.Notification;
+import apps.testosterol.birthdayreminder.SchedulingService.ConfigWorker;
 
 
 public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<NotificationRecyclerViewAdapter.RecyclerItemViewHolder> {
     private ArrayList<Notification> myList;
     private String mDate;
     private String mName;
+    private Context mContext;
 
 
 
-    NotificationRecyclerViewAdapter(ArrayList<Notification> myList) {
+    NotificationRecyclerViewAdapter(Context context, ArrayList<Notification> myList) {
         this.myList = myList;
+        this.mContext = context;
     }
     @NonNull
     public RecyclerItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -110,8 +130,8 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
                 isEmailNotification = true;
             }
 
-            new MainActivity().createNotification(num, notificationDailyWeeklyMonthly
-            , isEmailNotification, mName , mDate);
+            createNotification(mContext, num, notificationDailyWeeklyMonthly
+                    , isEmailNotification, mName , mDate);
            /* MainActivity karol = new MainActivity();
             karol.createNotification(num,notificationDailyWeeklyMonthly,isEmailNotification );*/
             //otification notification = new Notification(num, notificationDailyWeeklyMonthly, isEmailNotification);
@@ -143,6 +163,116 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
                 }
             });
         }
+
+        public void createNotification(Context context, String numOfDaysWeeksMonths, String notificationDailyWeeklyMonthly,
+                                       boolean isEmailNotification, String name, String BirthdayDate) {
+            Calendar todayDate = Calendar.getInstance();
+            //put shit into internal db...
+
+            //calculate difference between birthday day and days/months/weeks before
+            //add it to the calendar
+
+            String date[] = BirthdayDate.split("-");
+
+            Calendar dateOfNotification = Calendar.getInstance();
+
+            if(Integer.parseInt(date[2]) < dateOfNotification.get(Calendar.YEAR)) {
+                date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+            }
+            if((Integer.parseInt(date[1]) - 1) < dateOfNotification.get(Calendar.MONTH)){
+                date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+                dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+            }else{
+                if ((Integer.parseInt(date[1]) - 1) == dateOfNotification.get(Calendar.MONTH) && Integer.parseInt(date[0]) < dateOfNotification.get(Calendar.DAY_OF_YEAR)) {
+                    date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+                    dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+                }else{
+                    dateOfNotification.set((Integer.parseInt(date[2])), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+                }
+            }
+
+            int numSubtract;
+            switch (notificationDailyWeeklyMonthly) {
+                case "Days":
+                    if(numOfDaysWeeksMonths != null) {
+                        numSubtract = Integer.valueOf(numOfDaysWeeksMonths);
+                        dateOfNotification.add(Calendar.DAY_OF_YEAR, -numSubtract);
+                    }
+                    break;
+                case "Weeks":
+                    if(numOfDaysWeeksMonths != null) {
+                        numSubtract = Integer.valueOf(numOfDaysWeeksMonths);
+                        numSubtract *= 7;
+                        dateOfNotification.add(Calendar.DAY_OF_YEAR, -numSubtract);
+                    }
+                    break;
+                case "Months":
+                    if(numOfDaysWeeksMonths != null) {
+                        numSubtract = Integer.valueOf(numOfDaysWeeksMonths);
+                        dateOfNotification.add(Calendar.MONTH, -numSubtract);
+                    }
+                    break;
+            }
+
+            if(todayDate.get(Calendar.YEAR) > dateOfNotification.get(Calendar.YEAR)) {
+                dateOfNotification.set (Calendar.YEAR, todayDate.get(Calendar.YEAR));
+            }
+            if(todayDate.get(Calendar.MONTH) > dateOfNotification.get(Calendar.MONTH)){
+                dateOfNotification.set (Calendar.YEAR, todayDate.get(Calendar.YEAR) + 1);
+            }else{
+                if ((todayDate.get(Calendar.MONTH) == dateOfNotification.get(Calendar.MONTH) && (todayDate.get(Calendar.DAY_OF_YEAR) > dateOfNotification.get(Calendar.DAY_OF_YEAR)))) {
+                    dateOfNotification.set (Calendar.YEAR, todayDate.get(Calendar.YEAR) + 1);
+                }
+            }
+
+            long dateOfNotificationMillis = dateOfNotification.getTimeInMillis();
+            long todayDateMillis = todayDate.getTimeInMillis();
+            long dateDifferenceInMillis = dateOfNotificationMillis - todayDateMillis;
+            long notificationDelayInDays = TimeUnit.MILLISECONDS.toDays(dateDifferenceInMillis);
+
+            todayDate.add(Calendar.DAY_OF_YEAR, (int) notificationDelayInDays);
+
+
+            Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.birtdhaycake);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            icon.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            byte[] image = stream.toByteArray();
+            String profilePicture = Base64.encodeToString(image,Base64.DEFAULT);
+
+            DatabaseNotifications.getDatabaseNotifications(context).addEvent(name, BirthdayDate,
+                    String.format(Locale.ENGLISH,"%1$tA %1$tb %1$td %1$tY", dateOfNotification),
+                    System.currentTimeMillis(), notificationDelayInDays, isEmailNotification, profilePicture );
+
+
+
+    /*        //generate email if clicked ?
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                "mailto","abc@gmail.com", null));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Body");
+        startActivity(Intent.createChooser(emailIntent, "Send email..."));*/
+        }
+
+        /**
+         * Method to start workmanager to schedule flush of initial config.
+         *
+         * @param timeInDays , given time when the background work should be executed.
+         */
+        public void startWorkerInitConfig(long timeInDays){
+            OneTimeWorkRequest oneTimeDispatch = new OneTimeWorkRequest.Builder(ConfigWorker.class)
+                    .setInitialDelay(timeInDays, TimeUnit.DAYS) // run just one time at this time
+                    .addTag("notification")
+                    .build();
+            WorkManager.getInstance().enqueue(oneTimeDispatch);
+
+
+            // TODO: FIGURE OUT CANCELLING SPECIFIC WORK
+
+     /*   WorkManager.getInstance().enqueueUniqueWork()
+        WorkManager.getInstance().cancelWorkById();*/
+        }
+
+
 
     }
 }

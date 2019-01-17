@@ -29,4 +29,7 @@
     <string name="action_search">Search</string>
     <string name="search_hint">Type name…</string>
     <string name="app_name">Birthday Reminder</string>
+    <string name="Birthday">Birthday</string>
+    <string name="NotificationDatenotification">Date of notification</string>
+    <string name="ChangePicture">Change picture</string>
 </resources>

@@ -7,50 +7,34 @@ import java.util.Date;
 
  public class Notification {
 
-    private String num, notificationDailyWeeklyMonthly, name;
+    private String notificationDate, name, birthdayDate , image;
     private boolean isEmailNotification;
-    private Date date;
-
-    String image;
-    String phone;
-
+  
     public Notification(){}
 
-    Notification(String number, String notificationRegularity, boolean isEmail, String remindantName, Date birthdayDate){
-        this.num = number;
-        this.notificationDailyWeeklyMonthly = notificationRegularity;
+    Notification(String notificationDatebe, boolean isEmail, String remindantName, String birthdayDate){
+        this.notificationDate = notificationDatebe;
         this.isEmailNotification = isEmail;
-        this.date = birthdayDate;
+        this.birthdayDate = birthdayDate;
         this.name = remindantName;
     }
 
-    public void createNotification(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-
-        }else{
-
-        }
-    }
-
-
-     public void setName(String name) {
-         this.name = name;
-     }
+     public void setName(String name) { this.name = name; }
 
      public void setImage(String image){this.image = image;}
 
-     public void setPhone(String phone) {this.phone = phone;}
+     public void setBirthday(String birthday){this.birthdayDate = birthday;}
+     
+     public void setNotificationDate(String birthdayDate) {this.notificationDate = birthdayDate;}
 
+     public String getBirthday(){ return birthdayDate; }
+     
     public String getName() {
         return name;
     }
 
-    public String getImage() {
-        return image;
-    }
+    public String getImage() { return image; }
 
-    public String getPhone() {
-        return phone;
-    }
+    public String getNotificationDate() { return notificationDate; }
 
 }

@@ -10,6 +10,7 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -43,6 +44,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,13 +55,12 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
+import apps.testosterol.birthdayreminder.Database.DatabaseStats;
 import apps.testosterol.birthdayreminder.Notification.Notification;
 import apps.testosterol.birthdayreminder.Notification.NotificationAdapter;
 import apps.testosterol.birthdayreminder.SchedulingService.ConfigWorker;
 import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
 import apps.testosterol.birthdayreminder.Util.MyDividerItemDecoration;
-
-import static apps.testosterol.birthdayreminder.Util.NetworkInfo.URL;
 
 public class MainActivity extends AppCompatActivity implements LifecycleOwner, NotificationAdapter.NotificationsAdapterListener{
 
@@ -73,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
     Dialog dialog;
     EditText birthDay, name;
     int mYear, mMonth, mDay;
-    int saveYear, saveMonth, saveDay;
     RecyclerView mRecyclerView;
     NotificationRecyclerViewAdapter mRecyclerAdapter;
     ArrayList<Notification> myList = new ArrayList<>();
@@ -82,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
     ArrayList<Notification> notificationList = new ArrayList<>();
     private NotificationAdapter mAdapter;
     private SearchView searchView;
-
-    private static String dateOfNotification,nameOfNotification;
 
     private static final String URL = "https://api.androidhive.info/json/contacts.json";
 
@@ -133,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.toolbar_title);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
 
         recyclerView = findViewById(R.id.recycler_view);
@@ -149,41 +148,21 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         recyclerView.setAdapter(mAdapter);
 
 
-        fetchNotifications();
+        //fetchNotifications();
 
-    }
+        JSONArray jsonArray = DatabaseNotifications.getDatabaseNotifications(this).getNotifications("notifications");
 
-    /**
-     * fetches json by making http calls
-     */
-    private void fetchNotifications() {
-        JsonArrayRequest request = new JsonArrayRequest(URL, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        if (response == null) {
-                            Toast.makeText(getApplicationContext(), "Couldn't fetch the notifications! Pleas try again.", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        List<Notification> items = new Gson().fromJson(response.toString(), new TypeToken<List<Notification>>() {
-                        }.getType());
+        Log.d("JSONARRAY: ", "JSON array : " + jsonArray);
 
-                        // adding notifications to notifications list
-                        notificationList.clear();
-                        notificationList.addAll(items);
+        List<Notification> items = new Gson().fromJson(jsonArray.toString(), new TypeToken<List<Notification>>() {
+        }.getType());
 
-                        // refreshing recycler view
-                        mAdapter.notifyDataSetChanged();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // error in getting json
-                Log.e(TAG, "Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        Log.d("JSONARRAY: ", "items : " + items);
+        notificationList.clear();
+        notificationList.addAll(items);
 
-        MyApplication.getInstance().addToRequestQueue(request);
+        // refreshing recycler view
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -254,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
 
     @Override
     public void onNotificationSelected(Notification notification) {
-        Toast.makeText(getApplicationContext(), "Selected: " + notification.getName() + ", " + notification.getPhone(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Selected: " + notification.getName() + ", " + notification.getBirthday(), Toast.LENGTH_LONG).show();
     }
 
     private void openMenu(){
@@ -322,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         myList.clear();
 
         mRecyclerView = dialog.findViewById(R.id.recyclerView);
-        mRecyclerAdapter = new NotificationRecyclerViewAdapter(myList);
+        mRecyclerAdapter = new NotificationRecyclerViewAdapter(this, myList);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -335,12 +314,10 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
                 && !name.getText().toString().equals("") && !name.getText().toString().equals("Name")) {
                     Notification mLog = new Notification();
                     myList.add(mLog);
-                    mRecyclerAdapter.notifyData(myList, getBirthdayOfNotification(), getNameOfNotification());
-                   // mRecyclerAdapter.notifyDataSetChanged();
+                    mRecyclerAdapter.notifyData(myList, birthDay.getText().toString(), name.getText().toString());
                 }else{
                     Toast.makeText(MainActivity.this, "Please fill Birthday and Name first", Toast.LENGTH_LONG).show();
                 }
-                //createNotification("","",true, "", "");
             }
         });
         name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -355,7 +332,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
                     }
                     name.clearFocus();
                 }
-                saveName(name.getText().toString());
             }
         });
         birthDay.setOnClickListener(new View.OnClickListener() {
@@ -375,7 +351,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
                                                   int monthOfYear, int dayOfMonth) {
                                 String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", dayOfMonth, (monthOfYear + 1),year );
                                 birthDay.setText(formattedDate);
-                                saveBirthday(formattedDate);
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
@@ -384,110 +359,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         });
     }
 
-    public void saveName(String name){
-        nameOfNotification = name;
-    }
-    public void saveBirthday(String date){
-        dateOfNotification = date;
-    }
-    public String getNameOfNotification(){
-        return nameOfNotification;
-    }
-    public String getBirthdayOfNotification(){ return dateOfNotification;}
 
-    public void createNotification(String numOfDaysWeeksMonths, String notificationDailyWeeklyMonthly,
-                                   boolean isEmailNotification, String name, String BirthdayDate) {
-
-        //put shit into internal db...
-
-        //calculate difference between birthday day and days/months/weeks before
-        //add it to the calendar
-
-        String date[] = BirthdayDate.split("-");
-
-        Calendar dateOfNotification = Calendar.getInstance();
-        
-        if(Integer.parseInt(date[2]) < dateOfNotification.get(Calendar.YEAR)) {
-            date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
-        }
-        if((Integer.parseInt(date[1]) - 1) < dateOfNotification.get(Calendar.MONTH)){
-            date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
-            dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
-        }else{
-            if ((Integer.parseInt(date[1]) - 1) == dateOfNotification.get(Calendar.MONTH) && Integer.parseInt(date[0]) < dateOfNotification.get(Calendar.DAY_OF_YEAR)) {
-                date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
-                dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
-            }else{
-                dateOfNotification.set((Integer.parseInt(date[2])), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
-            }
-        }
-
-        int numSubstract;
-        switch (notificationDailyWeeklyMonthly) {
-            case "Days":
-                if(numOfDaysWeeksMonths != null) {
-                    numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                    dateOfNotification.add(Calendar.DAY_OF_YEAR, -numSubstract);
-                }
-                break;
-            case "Weeks":
-                if(numOfDaysWeeksMonths != null) {
-                    numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                    numSubstract *= 7;
-                    dateOfNotification.add(Calendar.DAY_OF_YEAR, -numSubstract);
-                }
-                break;
-            case "Months":
-                if(numOfDaysWeeksMonths != null) {
-                    numSubstract = Integer.valueOf(numOfDaysWeeksMonths);
-                    dateOfNotification.add(Calendar.MONTH, -numSubstract);
-                }
-                break;
-        }
-
-        Calendar todayDate = Calendar.getInstance();
-
-        if(todayDate.get(Calendar.YEAR) > dateOfNotification.get(Calendar.YEAR)) {
-            dateOfNotification.set (Calendar.YEAR, todayDate.get(Calendar.YEAR));
-        }
-        if(todayDate.get(Calendar.MONTH) > dateOfNotification.get(Calendar.MONTH)){
-            dateOfNotification.set (Calendar.YEAR, todayDate.get(Calendar.YEAR) + 1);
-        }else{
-            if ((todayDate.get(Calendar.MONTH) == dateOfNotification.get(Calendar.MONTH) && (todayDate.get(Calendar.DAY_OF_YEAR) > dateOfNotification.get(Calendar.DAY_OF_YEAR)))) {
-                dateOfNotification.set (Calendar.YEAR, todayDate.get(Calendar.YEAR) + 1);
-            }
-        }
-        
-
-
-        long dateOfNotificationMillis = dateOfNotification.getTimeInMillis();
-        long todayDateMillis = todayDate.getTimeInMillis();
-        long dateDifferenceInMillis = dateOfNotificationMillis - todayDateMillis;
-        long notificationDelayInDays = TimeUnit.DAYS.convert(dateDifferenceInMillis, TimeUnit.MILLISECONDS);
-        
-        // add this to work manager as delay - alebo nastav alarm o tolko dni neskor
-        notificationDelayInDays += 1;
-
-
-
-
-        //startWorkerInitConfig(notificationDelayInDays);
-
-        DatabaseNotifications datebaseNotifications = new DatabaseNotifications(MainActivity.this);
-        datebaseNotifications.addEvent("", "",
-                "", System.currentTimeMillis(), System.currentTimeMillis(), true );
-
-      /*  DatabaseNotifications.getDatabaseNotifications(MainActivity.this).addEvent(name, BirthdayDate,
-                todayDate.toString(), System.currentTimeMillis(), notificationDelayInDays, isEmailNotification );
-*/
-
-    /*        //generate email if clicked ?
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                "mailto","abc@gmail.com", null));
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "Body");
-        startActivity(Intent.createChooser(emailIntent, "Send email..."));*/
-    }
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
@@ -508,23 +380,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
     }
 
 
-    /**
-     * Method to start workmanager to schedule flush of initial config.
-     *
-     * @param timeInDays , given time when the background work should be executed.
-     */
-    public static void startWorkerInitConfig(long timeInDays){
-        OneTimeWorkRequest oneTimeDispatch = new OneTimeWorkRequest.Builder(ConfigWorker.class)
-                .setInitialDelay(timeInDays, TimeUnit.DAYS) // run just one time at this time
-                .addTag("notification")
-                .build();
-        WorkManager.getInstance().enqueue(oneTimeDispatch);
-
-        // TODO: FIGURE OUT CANCELLING SPECIFIC WORK
-
-     /*   WorkManager.getInstance().enqueueUniqueWork()
-        WorkManager.getInstance().cancelWorkById();*/
-    }
 
 
 }
