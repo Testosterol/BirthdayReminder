@@ -3,9 +3,10 @@ package apps.testosterol.birthdayreminder.Notification;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 
+import java.io.Serializable;
 import java.util.Date;
 
- public class Notification {
+ public class Notification implements Serializable {
 
     private String notificationDate, name, birthdayDate , image;
     private boolean isEmailNotification;

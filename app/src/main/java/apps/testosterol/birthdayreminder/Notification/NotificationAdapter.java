@@ -50,6 +50,16 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     // send selected notification in callback
                     listener.onNotificationSelected(notificationListFiltered.get(getAdapterPosition()));
                     Intent intent = new Intent(context, NotificationActivity.class);
+
+                    Notification notification = new Notification();
+                    notification.setName(notificationListFiltered.get(getAdapterPosition()).getName());
+                    notification.setImage(notificationListFiltered.get(getAdapterPosition()).getImage());
+                    notification.setBirthday(notificationListFiltered.get(getAdapterPosition()).getBirthday());
+                    notification.setNotificationDate(notificationListFiltered.get(getAdapterPosition()).getNotificationDate());
+
+                    // 3. put person in intent data
+                    intent.putExtra("notification", notification);
+
                     context.startActivity(intent);
                 }
             });

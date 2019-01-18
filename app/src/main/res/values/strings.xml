@@ -32,4 +32,6 @@
     <string name="Birthday">Birthday</string>
     <string name="NotificationDatenotification">Date of notification</string>
     <string name="ChangePicture">Change picture</string>
+    <string name="save_reminder">Save</string>
+    <string name="reset">Reset</string>
 </resources>

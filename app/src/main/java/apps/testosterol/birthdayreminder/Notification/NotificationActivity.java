@@ -21,15 +21,17 @@ import com.bumptech.glide.request.RequestOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 
 import apps.testosterol.birthdayreminder.MainActivity;
 import apps.testosterol.birthdayreminder.R;
 
-public class NotificationActivity extends AppCompatActivity {
+public class NotificationActivity extends AppCompatActivity implements Serializable {
 
     private static final int IMG_RESULT = 1;
     EditText name, birthday, notificationDate;
     ImageView profilePicture;
+    Notification notification;
 
     @Override
     public void onCreate(Bundle savedInstances) {
@@ -43,6 +45,24 @@ public class NotificationActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         profilePicture = findViewById(R.id.profilePicture);
+        name = findViewById(R.id.nameNotification);
+        birthday = findViewById(R.id.birthdayDateNotification);
+        notificationDate = findViewById(R.id.notificationDate);
+
+        Intent intent = getIntent();
+
+        notification = (Notification) intent.getSerializableExtra("notification");
+
+        name.setText(notification.getName());
+        birthday.setText(notification.getBirthday());
+        notificationDate.setText(notification.getNotificationDate());
+
+        byte[] imageByteArray = Base64.decode(notification.getImage(), Base64.DEFAULT);
+
+        Glide.with(this)
+                .load(imageByteArray)
+                .apply(RequestOptions.circleCropTransform())
+                .into(profilePicture);
 
 
         profilePicture.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +104,7 @@ public class NotificationActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             byte[] image = stream.toByteArray();
             String profilePicture = Base64.encodeToString(image,Base64.DEFAULT);
+            notification.setImage(profilePicture);
             //    saveProfilePicture(profilePicture);
         } catch (IOException e) {
             e.printStackTrace();

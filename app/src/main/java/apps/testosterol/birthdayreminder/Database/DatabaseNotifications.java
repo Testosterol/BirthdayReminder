@@ -85,6 +85,32 @@ public class DatabaseNotifications extends SQLiteOpenHelper {
         this.close();
     }
 
+    public void updateEvent(String eventName, String eventBirthdayDate, String eventDateToday,
+                            Long time, Long eventDaysDelayNotification, boolean eventEmail, String image){
+
+        ContentValues values = new ContentValues();
+        values.put(EVENT_NAME, eventName);
+        values.put(EVENT_BIRTHDAY_DATE, eventBirthdayDate);
+        values.put(EVENT_DATE_OF_NOTIFICATION, eventDateToday);
+        values.put(EVENT_TIMESTAMP, time);
+        values.put(EVENT_DAYS_DELAY_NOTIFICATION, eventDaysDelayNotification);
+        values.put(EVENT_EMAIL, eventEmail);
+        values.put(EVENT_IMAGE, image);
+
+        String where = "name=? AND birthdayDate=? AND notificationDate=? " +
+                "AND event_timestamp=? AND event_days_delay_notification=? " +
+                "AND event_email=? AND image=?";
+        String[] whereArgs = {eventName, eventBirthdayDate, eventDateToday, time.toString() ,
+                eventDaysDelayNotification.toString(), Boolean.toString(eventEmail), image};
+
+        try{
+            this.getWritableDatabase().update(TABLE_NOTIFICATIONS, values, where, whereArgs);
+        } catch (SQLiteException exception){
+            this.close();
+        }
+        this.close();
+    }
+
     /**
      * Method to retrieve all the fields from database.
      *
