@@ -2,11 +2,9 @@ package apps.testosterol.birthdayreminder.Notification;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Filter;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,12 +49,16 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     listener.onNotificationSelected(notificationListFiltered.get(getAdapterPosition()));
                     Intent intent = new Intent(context, NotificationActivity.class);
 
+                    Log.d("TESTEST", "id:" + notificationListFiltered.get(getAdapterPosition()).getId() +
+                            " name:" + notificationListFiltered.get(getAdapterPosition()).getName());
+
                     Notification notification = new Notification();
                     notification.setName(notificationListFiltered.get(getAdapterPosition()).getName());
                     notification.setImage(notificationListFiltered.get(getAdapterPosition()).getImage());
                     notification.setBirthday(notificationListFiltered.get(getAdapterPosition()).getBirthday());
                     notification.setNotificationDate(notificationListFiltered.get(getAdapterPosition()).getNotificationDate());
-
+                    notification.setId(notificationListFiltered.get(getAdapterPosition()).getId());
+                    notification.setEventEmail(notificationListFiltered.get(getAdapterPosition()).getEmail());
                     // 3. put person in intent data
                     intent.putExtra("notification", notification);
 
@@ -90,10 +92,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.birthdayDate.setText(String.format("%s%s%s", context.getString(R.string.Birthday),": ", notification.getBirthday()));
         holder.notificationDate.setText(String.format("%s%s%s",context.getString(R.string.NotificationDatenotification), ": ", notification.getNotificationDate()));
 
-        byte[] imageByteArray = Base64.decode(notification.getImage(), Base64.DEFAULT);
+        String bitmap = notification.getImage();
 
         Glide.with(context)
-                .load(imageByteArray)
+                .load(bitmap)
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.thumbnail);
     }

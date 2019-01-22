@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
+import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
 import apps.testosterol.birthdayreminder.MainActivity;
 import apps.testosterol.birthdayreminder.R;
 
@@ -32,6 +34,7 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
     EditText name, birthday, notificationDate;
     ImageView profilePicture;
     Notification notification;
+    Integer id;
 
     @Override
     public void onCreate(Bundle savedInstances) {
@@ -56,6 +59,7 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
         name.setText(notification.getName());
         birthday.setText(notification.getBirthday());
         notificationDate.setText(notification.getNotificationDate());
+        id = notification.getId();
 
         byte[] imageByteArray = Base64.decode(notification.getImage(), Base64.DEFAULT);
 

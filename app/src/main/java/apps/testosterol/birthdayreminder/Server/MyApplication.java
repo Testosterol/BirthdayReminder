@@ -1,4 +1,4 @@
-package apps.testosterol.birthdayreminder;
+package apps.testosterol.birthdayreminder.Server;
 
 
 import android.app.Application;

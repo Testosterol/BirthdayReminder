@@ -9,11 +9,8 @@ import android.app.SearchManager;
 import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -37,29 +34,20 @@ import android.widget.EditText;
 import android.support.v7.widget.SearchView;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
-import apps.testosterol.birthdayreminder.Database.DatabaseStats;
 import apps.testosterol.birthdayreminder.Notification.Notification;
 import apps.testosterol.birthdayreminder.Notification.NotificationAdapter;
-import apps.testosterol.birthdayreminder.SchedulingService.ConfigWorker;
 import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
+import apps.testosterol.birthdayreminder.Tracking.LifecycleTracker;
 import apps.testosterol.birthdayreminder.Util.MyDividerItemDecoration;
 
 public class MainActivity extends AppCompatActivity implements LifecycleOwner, NotificationAdapter.NotificationsAdapterListener{

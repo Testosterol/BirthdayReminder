@@ -1,4 +1,4 @@
-package apps.testosterol.birthdayreminder;
+package apps.testosterol.birthdayreminder.Tracking;
 
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
@@ -10,7 +10,7 @@ public class LifecycleTracker implements LifecycleObserver {
     private static final String TAG = LifecycleTracker.class.getSimpleName();
     private static final LifecycleTracker instance = new LifecycleTracker();
 
-    static LifecycleTracker getInstance(){ return instance;}
+    public static LifecycleTracker getInstance(){ return instance;}
 
     private LifecycleTracker(){
     }

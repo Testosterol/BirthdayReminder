@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -85,23 +86,13 @@ public class DatabaseNotifications extends SQLiteOpenHelper {
         this.close();
     }
 
-    public void updateEvent(String eventName, String eventBirthdayDate, String eventDateToday,
-                            Long time, Long eventDaysDelayNotification, boolean eventEmail, String image){
+    public void updateEventPicture(Integer id, Uri image){
 
         ContentValues values = new ContentValues();
-        values.put(EVENT_NAME, eventName);
-        values.put(EVENT_BIRTHDAY_DATE, eventBirthdayDate);
-        values.put(EVENT_DATE_OF_NOTIFICATION, eventDateToday);
-        values.put(EVENT_TIMESTAMP, time);
-        values.put(EVENT_DAYS_DELAY_NOTIFICATION, eventDaysDelayNotification);
-        values.put(EVENT_EMAIL, eventEmail);
-        values.put(EVENT_IMAGE, image);
+        values.put(EVENT_IMAGE, String.valueOf(image));
 
-        String where = "name=? AND birthdayDate=? AND notificationDate=? " +
-                "AND event_timestamp=? AND event_days_delay_notification=? " +
-                "AND event_email=? AND image=?";
-        String[] whereArgs = {eventName, eventBirthdayDate, eventDateToday, time.toString() ,
-                eventDaysDelayNotification.toString(), Boolean.toString(eventEmail), image};
+        String where = "_id=?";
+        String[] whereArgs = {id.toString()};
 
         try{
             this.getWritableDatabase().update(TABLE_NOTIFICATIONS, values, where, whereArgs);
@@ -125,7 +116,7 @@ public class DatabaseNotifications extends SQLiteOpenHelper {
         while (!cursor.isAfterLast()) {
             int totalColumn = cursor.getColumnCount();
             JSONObject rowObject = new JSONObject();
-            for( int i=2 ;  i< totalColumn ; i++ ) {
+            for( int i=0 ;  i< totalColumn ; i++ ) {
                 if( cursor.getColumnName(i) != null ) {
                     try {
                         if( cursor.getString(i) != null ) {
