@@ -40,7 +40,7 @@ public class Notification implements Serializable {
 
     public String getName() { return name; }
 
-    public String getImage() { return image.toString(); }
+    public String getImage() { return image; }
 
     public String getNotificationDate() { return notificationDate; }
 

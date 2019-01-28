@@ -234,16 +234,10 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
 
             todayDate.add(Calendar.DAY_OF_YEAR, (int) notificationDelayInDays);
 
-
-            Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.birtdhaycake);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            icon.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-            byte[] image = stream.toByteArray();
-            String profilePicture = Base64.encodeToString(image,Base64.DEFAULT);
-
+            String imageUrl = getURLForResource(R.drawable.birtdhaycake);
             DatabaseNotifications.getDatabaseNotifications(context).addEvent(name, BirthdayDate,
                     String.format(Locale.ENGLISH,"%1$tA %1$tb %1$td %1$tY", dateOfNotification),
-                    System.currentTimeMillis(), notificationDelayInDays, isEmailNotification, profilePicture );
+                    System.currentTimeMillis(), notificationDelayInDays, isEmailNotification, imageUrl );
 
 
 
@@ -253,6 +247,10 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
         emailIntent.putExtra(Intent.EXTRA_TEXT, "Body");
         startActivity(Intent.createChooser(emailIntent, "Send email..."));*/
+        }
+
+        public String getURLForResource (int resourceId) {
+            return Uri.parse("android.resource://"+R.class.getPackage().getName()+"/" +resourceId).toString();
         }
 
         /**

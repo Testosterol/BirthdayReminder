@@ -50,7 +50,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     Intent intent = new Intent(context, NotificationActivity.class);
 
                     Log.d("TESTEST", "id:" + notificationListFiltered.get(getAdapterPosition()).getId() +
-                            " name:" + notificationListFiltered.get(getAdapterPosition()).getName());
+                            " name:" + notificationListFiltered.get(getAdapterPosition()).getName() + " image: " +
+                            notificationListFiltered.get(getAdapterPosition()).getImage());
 
                     Notification notification = new Notification();
                     notification.setName(notificationListFiltered.get(getAdapterPosition()).getName());
@@ -91,11 +92,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         holder.name.setText(notification.getName());
         holder.birthdayDate.setText(String.format("%s%s%s", context.getString(R.string.Birthday),": ", notification.getBirthday()));
         holder.notificationDate.setText(String.format("%s%s%s",context.getString(R.string.NotificationDatenotification), ": ", notification.getNotificationDate()));
-
-        String bitmap = notification.getImage();
-
+        String imagePath = notification.getImage();
         Glide.with(context)
-                .load(bitmap)
+                .load(imagePath)
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.thumbnail);
     }

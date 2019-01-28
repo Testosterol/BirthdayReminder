@@ -86,7 +86,7 @@ public class DatabaseNotifications extends SQLiteOpenHelper {
         this.close();
     }
 
-    public void updateEventPicture(Integer id, Uri image){
+    public void updateEventPicture(Integer id, String image){
 
         ContentValues values = new ContentValues();
         values.put(EVENT_IMAGE, String.valueOf(image));
