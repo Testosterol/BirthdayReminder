@@ -35,4 +35,10 @@
     <string name="save_reminder">Save</string>
     <string name="reset">Reset</string>
     <string name="past_date_year">Past date: please set the date for the following year</string>
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
+    <string name="permission_go_to_settings">go to settings</string>
+    <string name="permission_title">permission required</string>
+    <string name="permission_phone_rationale_write_external_storage">Please enable storage permission to show change an image</string>
+    <string name="permission_phone_write_external_storage_toast">permission required to load an image</string>
 </resources>

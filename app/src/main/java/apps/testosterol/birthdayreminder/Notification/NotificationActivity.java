@@ -1,9 +1,11 @@
 package apps.testosterol.birthdayreminder.Notification;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -13,8 +15,13 @@ import android.graphics.Path;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
@@ -30,11 +37,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -44,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
 import apps.testosterol.birthdayreminder.MainActivity;
 import apps.testosterol.birthdayreminder.R;
+import apps.testosterol.birthdayreminder.Util.DialogUtilPrompt;
 
 public class NotificationActivity extends AppCompatActivity implements Serializable {
 
@@ -226,10 +236,49 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (permissions.length > 0 && permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (!(grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    DialogUtilPrompt.showNeverAskAgainDialogWriteExternalStorage(this, new DialogUtilPrompt.OnDialogClickCallback() {
+                        @Override
+                        public void onPositiveClick(MaterialDialog dialog) {
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", getPackageName(), null);
+                            intent.setData(uri);
+                            startActivity(intent);
+                        }
+                        @Override
+                        public void onNegativeClick(MaterialDialog dialog) {
+                            DialogUtilPrompt.dismissDialogWithCheck(dialog);
+                        }
+                    });
+                } else {
+                    Toast toast = Toast.makeText(this, R.string.permission_phone_write_external_storage_toast, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dpToPx(70));
+                    toast.show();
+                }
+            }
+        }
+    }
+
 
     private void getUserImage(){
-        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, IMG_RESULT);
+        String[] PERMISSIONS = {
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        };
+        if ((ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED)){
+            ActivityCompat.requestPermissions(this,
+                    PERMISSIONS, 1);
+        }else {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, IMG_RESULT);
+        }
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
