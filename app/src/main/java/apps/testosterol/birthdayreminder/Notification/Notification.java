@@ -26,17 +26,17 @@ public class Notification implements Serializable {
 
     public void setId(Integer id){this._id = id;}
 
-     public void setName(String name) { this.name = name; }
+    public void setName(String name) { this.name = name; }
 
-     public void setImage(String image){this.image = image;}
+    public void setImage(String image){this.image = image;}
 
-     public void setBirthday(String birthday){this.birthdayDate = birthday;}
+    public void setBirthday(String birthday){this.birthdayDate = birthday;}
 
-     public void setNotificationDate(String birthdayDate) {this.notificationDate = birthdayDate;}
+    public void setNotificationDate(String birthdayDate) {this.notificationDate = birthdayDate;}
 
-     public void setEventEmail(boolean isEmail){this.event_email = isEmail;}
+    public void setEventEmail(boolean isEmail){this.event_email = isEmail;}
 
-     public String getBirthday(){ return birthdayDate; }
+    public String getBirthday(){ return birthdayDate; }
 
     public String getName() { return name; }
 

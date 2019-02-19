@@ -1,21 +1,15 @@
 package apps.testosterol.birthdayreminder.Notification;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -23,8 +17,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -41,19 +33,16 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
-import apps.testosterol.birthdayreminder.MainActivity;
 import apps.testosterol.birthdayreminder.R;
 import apps.testosterol.birthdayreminder.Util.DialogUtilPrompt;
+import apps.testosterol.birthdayreminder.Util.Util;
+
+import static apps.testosterol.birthdayreminder.Util.Util.dpToPx;
 
 public class NotificationActivity extends AppCompatActivity implements Serializable {
 
@@ -77,10 +66,12 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
         setContentView(R.layout.notification_activity);
 
         // toolbar fancy stuff
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.toolbar_title);
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle(R.string.toolbar_title);
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         profilePicture = findViewById(R.id.profilePicture);
         name = findViewById(R.id.nameNotification);
@@ -131,7 +122,6 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
                 mDay = c.get(Calendar.DAY_OF_MONTH);
                 DatePickerDialog datePickerDialog = new DatePickerDialog(NotificationActivity.this,
                         new DatePickerDialog.OnDateSetListener() {
-
                             @Override
                             public void onDateSet(DatePicker view, int year,
                                                   int monthOfYear, int dayOfMonth) {
@@ -203,8 +193,7 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
             toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dpToPx(70));
             toast.show();
         }else{
-            // todo: reschedule notification based on id
-
+            //hm todo: reschedule notification based on id
         }
     }
 
@@ -219,7 +208,6 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
                 .load(imagePath)
                 .apply(RequestOptions.circleCropTransform())
                 .into(profilePicture);
-
     }
 
     private void saveChanges() {
@@ -262,6 +250,9 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
                     toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dpToPx(70));
                     toast.show();
                 }
+            }else{
+                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, IMG_RESULT);
             }
         }
     }
@@ -294,15 +285,18 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
 
     public String getPath(Uri uri) {
         String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor =getContentResolver().query(uri, projection, null,null,null);
-        int column_index = 0;
+        Cursor cursor = getContentResolver().query(uri, projection, null,null,null);
+        int column_index;
         if (cursor != null) {
             column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
-            return cursor.getString(column_index);
+            String path = cursor.getString(column_index);
+            cursor.close();
+            return path;
         }
         return "";
     }
+
 
     private void openMenu(){
         save.setScaleX(1f);
@@ -327,7 +321,5 @@ public class NotificationActivity extends AppCompatActivity implements Serializa
             menu.animate().rotation(45);
         }
     }
-    public static int dpToPx(int dp) {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
+
 }

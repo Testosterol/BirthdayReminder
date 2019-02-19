@@ -21,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,6 +51,9 @@ import apps.testosterol.birthdayreminder.Database.DatabaseNotifications;
 import apps.testosterol.birthdayreminder.Tracking.LifecycleTracker;
 import apps.testosterol.birthdayreminder.Util.MyDividerItemDecoration;
 
+import static android.widget.Toast.makeText;
+import static apps.testosterol.birthdayreminder.Util.Util.dpToPx;
+
 public class MainActivity extends AppCompatActivity implements LifecycleOwner, NotificationAdapter.NotificationsAdapterListener{
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -70,8 +74,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
     ArrayList<Notification> notificationList = new ArrayList<>();
     private NotificationAdapter mAdapter;
     private SearchView searchView;
-
-    private static final String URL = "https://api.androidhive.info/json/contacts.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,12 +142,9 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
 
         JSONArray jsonArray = DatabaseNotifications.getDatabaseNotifications(this).getNotifications("notifications");
 
-        Log.d("JSONARRAY: ", "JSON array : " + jsonArray);
-
         List<Notification> items = new Gson().fromJson(jsonArray.toString(), new TypeToken<List<Notification>>() {
         }.getType());
 
-        Log.d("JSONARRAY: ", "items : " + items);
         notificationList.clear();
         notificationList.addAll(items);
 
@@ -221,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
 
     @Override
     public void onNotificationSelected(Notification notification) {
-        Toast.makeText(getApplicationContext(), "Selected: " + notification.getName() + ", " + notification.getBirthday(), Toast.LENGTH_LONG).show();
+        makeText(getApplicationContext(), "Selected: " + notification.getName() + ", " + notification.getBirthday(), Toast.LENGTH_LONG).show();
     }
 
     private void openMenu(){
@@ -304,7 +303,9 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
                     myList.add(mLog);
                     mRecyclerAdapter.notifyData(myList, birthDay.getText().toString(), name.getText().toString());
                 }else{
-                    Toast.makeText(MainActivity.this, "Please fill Birthday and Name first", Toast.LENGTH_LONG).show();
+                    Toast toast = makeText(MainActivity.this, "Please fill Birthday and Name first", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dpToPx(70));
+                    toast.show();
                 }
             }
         });
@@ -356,6 +357,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
             CharSequence name = getString(R.string.channel_name);
             String description = getString(R.string.channel_description);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
@@ -364,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
             }
+
         }
     }
 

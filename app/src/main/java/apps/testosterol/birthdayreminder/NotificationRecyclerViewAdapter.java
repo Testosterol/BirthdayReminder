@@ -122,6 +122,7 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
 
         }
 
+
         @SuppressLint("RestrictedApi")
         void saveNotification(){
 

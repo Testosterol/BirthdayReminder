@@ -40,6 +40,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Notification.NotificationActivity" />
+        <activity android:name=".Util.Util" />
 
         <receiver
             android:name="BroadcastManager"
