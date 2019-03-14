@@ -78,8 +78,34 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
         getLifecycle().addObserver(LifecycleTracker.getInstance());
+
+        setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.toolbar_title);
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
+        //fetchNotifications();
+
+        JSONArray jsonArray = DatabaseNotifications.getDatabaseNotifications(this).getNotifications("notifications");
+
+        List<Notification> items = new Gson().fromJson(jsonArray.toString(), new TypeToken<List<Notification>>() {
+        }.getType());
+
+        notificationList.clear();
+        notificationList.addAll(items);
+
+        // refreshing recycler view
+        mAdapter.notifyDataSetChanged();
+
+
+
+
         createNotificationChannel();
 
         add = findViewById(R.id.Add);
@@ -113,15 +139,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
             }
         });
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // toolbar fancy stuff
-
-        // toolbar fancy stuff
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.toolbar_title);
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
 
         recyclerView = findViewById(R.id.recycler_view);
@@ -138,18 +155,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         recyclerView.setAdapter(mAdapter);
 
 
-        //fetchNotifications();
-
-        JSONArray jsonArray = DatabaseNotifications.getDatabaseNotifications(this).getNotifications("notifications");
-
-        List<Notification> items = new Gson().fromJson(jsonArray.toString(), new TypeToken<List<Notification>>() {
-        }.getType());
-
-        notificationList.clear();
-        notificationList.addAll(items);
-
-        // refreshing recycler view
-        mAdapter.notifyDataSetChanged();
     }
 
     @Override
