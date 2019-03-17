@@ -90,19 +90,6 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-        //fetchNotifications();
-
-        JSONArray jsonArray = DatabaseNotifications.getDatabaseNotifications(this).getNotifications("notifications");
-
-        List<Notification> items = new Gson().fromJson(jsonArray.toString(), new TypeToken<List<Notification>>() {
-        }.getType());
-
-        notificationList.clear();
-        notificationList.addAll(items);
-
-        // refreshing recycler view
-        mAdapter.notifyDataSetChanged();
-
 
 
 
@@ -118,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         fab_open = AnimationUtils.loadAnimation(this, R.anim.add_open);
         fab_close = AnimationUtils.loadAnimation(this, R.anim.add_close);
 
-        add.setOnClickListener(new View.OnClickListener() {
+               add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openMenu();
@@ -153,6 +140,20 @@ public class MainActivity extends AppCompatActivity implements LifecycleOwner, N
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration(this, DividerItemDecoration.VERTICAL, 36));
         recyclerView.setAdapter(mAdapter);
+
+        //fetchNotifications();
+
+        JSONArray jsonArray = DatabaseNotifications.getDatabaseNotifications(this).getNotifications("notifications");
+
+        List<Notification> items = new Gson().fromJson(jsonArray.toString(), new TypeToken<List<Notification>>() {
+        }.getType());
+
+        notificationList.clear();
+        notificationList.addAll(items);
+
+        // refreshing recycler view
+        mAdapter.notifyDataSetChanged();
+
 
 
     }
