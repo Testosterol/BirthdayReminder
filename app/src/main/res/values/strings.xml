@@ -3,20 +3,16 @@
     <string name="randomize">randomize</string>
     <string name="birthday_date">Birthday date</string>
     <string name="name">Name</string>
-    <string name="add_notification">Add notification</string>
+    <string name="add_notification">Add reminder</string>
     <string name="_1">1</string>
     <string name="e_mail">E-mail</string>
-    <string name="channel_name">Notification</string>
-    <string name="channel_description">Notification channel</string>
+    <string name="channel_name">Reminder</string>
+    <string name="channel_description">Reminder channel</string>
+    <string name="delete">DELETE</string>
     <string-array name="notification_options">
         <item>1 Month before</item>
         <item>1 Week before</item>
         <item>1 Day before</item>
-        <item>Mars</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
     </string-array>
     <string-array name="Notification_choose">
         <item>Days</item>
@@ -25,20 +21,23 @@
     </string-array>
 
     <string name="action_settings">Settings</string>
-    <string name="toolbar_title">Contacts</string>
+    <string name="toolbar_title">Reminders</string>
     <string name="action_search">Search</string>
     <string name="search_hint">Type name…</string>
     <string name="app_name">Birthday Reminder</string>
     <string name="Birthday">Birthday</string>
-    <string name="NotificationDatenotification">Date of notification</string>
+    <string name="NotificationDatenotification">Date of reminder</string>
     <string name="ChangePicture">Change picture</string>
     <string name="save_reminder">Save</string>
     <string name="reset">Reset</string>
     <string name="past_date_year">Past date: please set the date for the following year</string>
-    <string name="ok">ok</string>
-    <string name="cancel">cancel</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="permission_go_to_settings">go to settings</string>
     <string name="permission_title">permission required</string>
     <string name="permission_phone_rationale_write_external_storage">Please enable storage permission to show change an image</string>
     <string name="permission_phone_write_external_storage_toast">permission required to load an image</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

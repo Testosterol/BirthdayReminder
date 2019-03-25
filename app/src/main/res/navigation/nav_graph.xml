@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/createReminderFragment"
+        android:name="apps.testosterol.birthdayreminder.Reminder.Fragments.CreateReminderFragment"
+        android:label="fragment_create_reminder"
+        tools:layout="@layout/fragment_create_reminder" >
+        <action
+            android:id="@+id/action_createReminderFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_createReminderFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment"
+            app:popUpTo="@+id/createReminderFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/reminderInfo"
+        android:name="apps.testosterol.birthdayreminder.Reminder.Fragments.ReminderInfoFragment"
+        android:label="fragment_reminder_info"
+        tools:layout="@layout/fragment_reminder_info" >
+        <action
+            android:id="@+id/action_reminderInfo_to_mainFragment"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_reminderInfo_to_settingsFragment"
+            app:destination="@id/settingsFragment"
+            app:popUpTo="@id/reminderInfo" />
+    </fragment>
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="apps.testosterol.birthdayreminder.Main.MainFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_mainFragment_to_createReminderFragment"
+            app:destination="@id/createReminderFragment"
+            app:launchSingleTop="false" />
+        <action
+            android:id="@+id/action_mainFragment_to_reminderInfo"
+            app:destination="@id/reminderInfo" />
+        <action
+            android:id="@+id/action_mainFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment"
+            app:popUpTo="@+id/mainFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="apps.testosterol.birthdayreminder.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>

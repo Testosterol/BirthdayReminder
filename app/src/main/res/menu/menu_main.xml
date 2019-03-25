@@ -2,13 +2,34 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    tools:context=".Main.MainActivity">
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_black_24dp"
         android:orderInCategory="100"
         android:title="@string/action_search"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView" />
+
+    <item
+        android:id="@+id/action_go_back"
+        android:icon="@drawable/ic_arrow_back"
+        android:title="back"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_more"
+        android:title="@string/action_settings"
+        />
+    <item
+        android:id="@+id/action_buffer_field"
+        android:title="Buffer field 1"
+        />
+    <item
+        android:id="@+id/action_buffer_field2"
+        android:title="Buffer field 2"
+        />
+
 
 </menu>

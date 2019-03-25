@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
-import android.os.Build;
 import android.support.annotation.NonNull;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -18,7 +17,7 @@ public class DialogUtilPrompt {
 
     public static void showPermissionDialog(Activity activity, String title, String rationale, OnDialogClickCallback onDialogClickCallback) {
         if (activity != null && !activity.isFinishing()) {
-            showDialog(activity, title, rationale, activity.getString(R.string.ok), activity.getString(R.string.cancel), false, onDialogClickCallback);
+            showDialog(activity, title, rationale, activity.getString(R.string.ok), activity.getString(R.string.cancel), onDialogClickCallback);
         }
     }
 
@@ -53,7 +52,7 @@ public class DialogUtilPrompt {
     }
 
 
-    private static void showDialog(Context context, String title, String message, String positiveText, String negativeText, boolean cancelable, final OnDialogClickCallback onDialogClickCallback) {
+    private static void showDialog(Context context, String title, String message, String positiveText, String negativeText, final OnDialogClickCallback onDialogClickCallback) {
         MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
         builder.theme(Theme.LIGHT)
                 .title(title)
@@ -76,7 +75,7 @@ public class DialogUtilPrompt {
                 }
             }
         })
-                .cancelable(cancelable)
+                .cancelable(false)
                 .show();
     }
 
@@ -92,22 +91,13 @@ public class DialogUtilPrompt {
                 if (context instanceof Activity) {
 
                     // Api >=17
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        if (!((Activity) context).isFinishing() && !((Activity) context).isDestroyed()) {
-                            dismissWithTryCatch(dialog);
-                        }
-                    } else {
-
-                        // Api < 17. Unfortunately cannot check for isDestroyed()
-                        if (!((Activity) context).isFinishing()) {
-                            dismissWithTryCatch(dialog);
-                        }
+                    if (!((Activity) context).isFinishing() && !((Activity) context).isDestroyed()) {
+                        dismissWithTryCatch(dialog);
                     }
                 } else
                     // if the Context used wasn't an Activity, then dismiss it too
                     dismissWithTryCatch(dialog);
             }
-            dialog = null;
         }
     }
 
@@ -118,8 +108,6 @@ public class DialogUtilPrompt {
             // Do nothing.
         } catch (final Exception e) {
             // Do nothing.
-        } finally {
-            dialog = null;
         }
     }
 
