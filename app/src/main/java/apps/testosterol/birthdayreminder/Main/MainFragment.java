@@ -1,9 +1,13 @@
 package apps.testosterol.birthdayreminder.Main;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +23,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,15 +36,17 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Objects;
 
 import androidx.navigation.Navigation;
+import apps.testosterol.birthdayreminder.BroadcastReceiver.AlarmWakeUpBroadcastReceiver;
 import apps.testosterol.birthdayreminder.Database.ReminderDatabase;
 import apps.testosterol.birthdayreminder.R;
 import apps.testosterol.birthdayreminder.Reminder.Adapters.MainScreenRemindersAdapter;
-import apps.testosterol.birthdayreminder.Util.RecyclerItemTouchHelper;
 import apps.testosterol.birthdayreminder.Reminder.Reminder;
 import apps.testosterol.birthdayreminder.Util.MyDividerItemDecoration;
+import apps.testosterol.birthdayreminder.Util.RecyclerItemTouchHelper;
 import apps.testosterol.birthdayreminder.Util.Util;
 
 import static android.widget.Toast.makeText;
@@ -59,7 +66,7 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String TAG = MainFragment.class.getSimpleName();
+    private static final String CHANNEL_ID = "notifications";
 
     Button addReminder, random;
     Animation fab_open, fab_close;
@@ -68,13 +75,8 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
     RecyclerView allRemindersRecyclerView;
     ArrayList<Reminder> allRemindersList = new ArrayList<>();
     private MainScreenRemindersAdapter mainScreenAdapter;
-    private SearchView searchView;
     private ConstraintLayout constraintLayout;
     private View mainFragmentView;
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -104,8 +106,9 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            // TODO: Rename and change types of parameters
+            String mParam1 = getArguments().getString(ARG_PARAM1);
+            String mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -154,11 +157,13 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
 
         this.mainFragmentView = view;
 
-       /* Objects.requireNonNull(((AppCompatActivity) getActivity()).getSupportActionBar()).setBackgroundDrawable(new ColorDrawable(Color.BLACK));
-        Objects.requireNonNull(((AppCompatActivity) getActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(false);*/
         setHasOptionsMenu(true);
 
         Util.dontCoverTopOfTheScreenWithApp(view, getActivity());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Util.createNotificationChannel(getActivity(), CHANNEL_ID);
+        }
 
         add = view.findViewById(R.id.Add);
         addReminder = view.findViewById(R.id.AddReminder);
@@ -215,6 +220,7 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(allRemindersRecyclerView);
 
+
     }
 
     /**
@@ -232,8 +238,27 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
             final Reminder deletedItem = allRemindersList.get(viewHolder.getAdapterPosition());
             final int deletedIndex = viewHolder.getAdapterPosition();
 
+
+
+            Log.d("RemovingOnSwipe", "deletedIndex: " + deletedIndex);
+
+            Log.d("RemovingOnSwipe", "AllReminderList.getAdapterPosition.getReminderId: "
+                    + allRemindersList.get(viewHolder.getAdapterPosition()).get_reminderId());
+
+            Log.d("RemovingOnSwipe", "ID based on name from db" +
+                    ReminderDatabase.getInstance(getContext()).daoAccess().getReminderIdBasedOnName(name));
+
+            //todo: remove reminder from db and stop alarm manager for this specific intent
+
+
+            cancelAlarm(getContext(), allRemindersList.get(viewHolder.getAdapterPosition()).get_reminderId());
+
+
+            ReminderDatabase.getInstance(getContext()).daoAccess().removeSpecificReminder(deletedIndex);
+
             // remove the item from recycler view
             mainScreenAdapter.removeItem(viewHolder.getAdapterPosition());
+
 
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar.make(constraintLayout, name + " removed from reminders!", Snackbar.LENGTH_LONG);
@@ -241,15 +266,50 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
                 @Override
                 public void onClick(View view) {
 
+                    //todo: put back the notification into db and set the alarm manager again
+
                     // undo is selected, restore the deleted item
                     mainScreenAdapter.restoreItem(deletedItem, deletedIndex);
 
                     // refreshing recycler view
                     mainScreenAdapter.notifyDataSetChanged();
+
+                    Log.d("testReceiver", "karol id: " +  deletedItem.get_reminderId());
+
+                    renewTheAlarm(getContext(), deletedItem.getNotificationDateInMillis(), deletedItem.get_reminderId());
                 }
             });
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
+        }
+    }
+
+    public void cancelAlarm(Context context, long uniqueReminderId) {
+        Intent i = new Intent(context, AlarmWakeUpBroadcastReceiver.class);
+        PendingIntent pendingIntent =  (PendingIntent.getBroadcast(context, (int) uniqueReminderId, i, PendingIntent.FLAG_ONE_SHOT));
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (am != null) {
+            am.cancel(pendingIntent);
+        }
+    }
+
+    public void renewTheAlarm(Context context, long notificationDateInMillis, long uniqueReminderId) {
+
+        Log.d("testReceiver", "karol id renewthealarm: " + uniqueReminderId);
+
+        Intent i = new Intent(context, AlarmWakeUpBroadcastReceiver.class);
+        i.putExtra("reminder_id", uniqueReminderId);
+
+        Log.d("testReceiver", "karol id renewthealarm from intent: " + (Objects.requireNonNull(i.getExtras())).get("reminder_id"));
+
+        PendingIntent pendingIntent =  (PendingIntent.getBroadcast(context, (int) uniqueReminderId, i, 0));
+
+        Calendar c = Calendar.getInstance();
+
+        AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (aManager != null) {
+            aManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis() + 10000, pendingIntent );  // todo: get rid of additional time
         }
     }
 
@@ -259,7 +319,7 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) Objects.requireNonNull(getActivity()).getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         if (searchManager != null) {
             searchView.setSearchableInfo(searchManager
                     .getSearchableInfo(getActivity().getComponentName()));
@@ -339,7 +399,8 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
 
     @Override
     public void onReminderSelected(Reminder reminder) {
-        makeText(getContext(), "Selected Test Bro: " + reminder.getReminderName() + ", " + reminder.getReminderBirthdayDate(), Toast.LENGTH_LONG).show();
+        makeText(getContext(), "Selected: " + reminder.getReminderName() + ", " + reminder.getReminderBirthdayDate() + ", id:"
+                        + reminder.get_reminderId(), Toast.LENGTH_LONG).show();
     }
 
     /**

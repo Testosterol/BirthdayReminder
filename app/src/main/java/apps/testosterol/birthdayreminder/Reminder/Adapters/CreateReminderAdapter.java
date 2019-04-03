@@ -5,7 +5,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -21,7 +20,6 @@ import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import apps.testosterol.birthdayreminder.BroadcastReceiver.AlarmWakeUpBroadcastReceiver;
@@ -37,6 +35,9 @@ public class CreateReminderAdapter extends RecyclerView.Adapter<CreateReminderAd
     private String mImagePath;
     private Context mContext;
 
+    private static final int YEAR = 2;
+    private static final int MONTH = 1;
+    private static final int DAY = 0;
 
 
     public CreateReminderAdapter(Context context, ArrayList<Reminder> myList) {
@@ -147,7 +148,7 @@ public class CreateReminderAdapter extends RecyclerView.Adapter<CreateReminderAd
             });
         }
 
-        public void createNotification(String numOfDaysWeeksMonths, String notificationDailyWeeklyMonthly
+        private void createNotification(String numOfDaysWeeksMonths, String notificationDailyWeeklyMonthly
                 , String name, String birthdayDate) {
 
             Calendar dateOfBirthdayInCurrentYear = retreiveBirthdayDateForCurrentYear(birthdayDate);
@@ -165,11 +166,11 @@ public class CreateReminderAdapter extends RecyclerView.Adapter<CreateReminderAd
             todayDate.add(Calendar.DAY_OF_YEAR, (int) notificationDelayInDays);
 
 
-            Reminder reminder = createNewReminderBasedOnUserInput(mImagePath, name, birthdayDate, notificationDailyWeeklyMonthly);
+            Reminder reminder = createNewReminderBasedOnUserInput(mImagePath, name, birthdayDate, dateOfNotification);
 
             long insertedId = ReminderDatabase.getInstance(mContext).daoAccess().insertOnlySingleNotification(reminder);
 
-            setNotificationForSpecificDate(insertedId, reminder, dateDifferenceInMillis);
+            setNotificationForSpecificDate(insertedId, reminder, dateOfNotification);
         }
 
         private Calendar calculateDateOfNotification(Calendar dateOfNotification, String numOfDaysWeeksMonths,
@@ -220,61 +221,44 @@ public class CreateReminderAdapter extends RecyclerView.Adapter<CreateReminderAd
 
             Calendar dateOfNotification = Calendar.getInstance();
 
-            if(Integer.parseInt(date[2]) < dateOfNotification.get(Calendar.YEAR)) {
-                date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+            if(Integer.parseInt(date[YEAR]) < dateOfNotification.get(Calendar.YEAR)) {
+                date[YEAR] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
             }
-            if((Integer.parseInt(date[1]) - 1) < dateOfNotification.get(Calendar.MONTH)){
-                date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
-                dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+            if((Integer.parseInt(date[MONTH]) - 1) < dateOfNotification.get(Calendar.MONTH)){
+                date[YEAR] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+                dateOfNotification.set((Integer.parseInt(date[YEAR]) + 1), Integer.parseInt(date[MONTH]) - 1, Integer.parseInt(date[DAY]));
             }else{
-                if ((Integer.parseInt(date[1]) - 1) == dateOfNotification.get(Calendar.MONTH) && Integer.parseInt(date[0]) < dateOfNotification.get(Calendar.DAY_OF_YEAR)) {
-                    date[2] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
-                    dateOfNotification.set((Integer.parseInt(date[2]) +1), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+                if ((Integer.parseInt(date[MONTH]) - 1) == dateOfNotification.get(Calendar.MONTH) &&
+                        Integer.parseInt(date[DAY]) < dateOfNotification.get(Calendar.DAY_OF_MONTH)) {
+                    date[YEAR] = String.valueOf(dateOfNotification.get(Calendar.YEAR));
+                    dateOfNotification.set((Integer.parseInt(date[YEAR]) + 1), Integer.parseInt(date[MONTH]) - 1, Integer.parseInt(date[DAY]));
                 }else{
-                    dateOfNotification.set((Integer.parseInt(date[2])), Integer.parseInt(date[1])-1, Integer.parseInt(date[0]));
+                    dateOfNotification.set((Integer.parseInt(date[YEAR])), Integer.parseInt(date[MONTH]) - 1, Integer.parseInt(date[DAY]));
                 }
             }
             return dateOfNotification;
         }
 
-        private Reminder createNewReminderBasedOnUserInput(String mImagePath, String name, String birthdayDate, String notificationDailyWeeklyMonthly) {
-            Reminder reminder = new Reminder();
-            reminder.setReminderImage(mImagePath);
-            reminder.setReminderName(name);
-            reminder.setReminderBirthdayDate(birthdayDate);
-            reminder.setNotificationDate(notificationDailyWeeklyMonthly);
-            return reminder;
+        private Reminder createNewReminderBasedOnUserInput(String mImagePath, String name, String birthdayDate, Calendar dateOfNotification) {
+            return new Reminder(mImagePath, dateOfNotification.getTimeInMillis(), name, birthdayDate);
         }
 
-        private void setNotificationForSpecificDate(long insertedId, Reminder reminder, long dateDifferenceInMillis) {
-
-            Log.d("TESTINGINTENTALARM", "setNotificaitonForSpecificDate");
-
-            Log.d("TESTINGINTENTALARM", "insertedId: " + insertedId);
+        private void setNotificationForSpecificDate(long insertedId, Reminder reminder, Calendar dateOfNotification) {
 
             Intent intent = new Intent(mContext, AlarmWakeUpBroadcastReceiver.class);
 
-            intent.putExtra("reminder_name", reminder.getReminderImage());
             intent.putExtra("reminder_id", insertedId);
-
-            Log.d("TESTINGINTENTALARM", "intent.getId: " + Objects.requireNonNull(intent.getExtras()).get("reminder_id"));
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, (int)insertedId, intent, PendingIntent.FLAG_ONE_SHOT);
 
+            Calendar c = Calendar.getInstance(); // todo: remove after testing and set a normal date
 
-            //mContext.registerReceiver( AlarmWakeUpBroadcastReceiver.class ,intent);
-            mContext.sendBroadcast(intent);
-
-            Calendar c = Calendar.getInstance();
-            int mseconds = c.get(Calendar.MILLISECOND);
-            long timeOrLengthofWait = 10000;
             AlarmManager aManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-            int alarmType = AlarmManager.ELAPSED_REALTIME_WAKEUP;
             if (aManager != null) {
-                aManager.set(alarmType, SystemClock.elapsedRealtime()+timeOrLengthofWait, pendingIntent );
+                aManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis() + 10000, pendingIntent );  // todo: get rid of additional time
             }
-        }
 
+        }
 
     }
 }

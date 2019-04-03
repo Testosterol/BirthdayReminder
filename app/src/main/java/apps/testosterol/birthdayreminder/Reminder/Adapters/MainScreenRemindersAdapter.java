@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import androidx.navigation.Navigation;
@@ -40,8 +43,8 @@ public class MainScreenRemindersAdapter extends RecyclerView.Adapter<MainScreenR
         public MyViewHolder(View view) {
             super(view);
             selectedReminderName = view.findViewById(R.id.name);
-            selectedReminderBirthdayDate = view.findViewById(R.id.birthday);
-            selectedReminderNotificationDate = view.findViewById(R.id.notification_date);
+            selectedReminderBirthdayDate = view.findViewById(R.id.user_row_item_birthday_date);
+            selectedReminderNotificationDate = view.findViewById(R.id.user_row_item_notification_date);
             selectedReminderImage = view.findViewById(R.id.thumbnail);
 
             viewBackground = view.findViewById(R.id.view_background);
@@ -57,7 +60,20 @@ public class MainScreenRemindersAdapter extends RecyclerView.Adapter<MainScreenR
                     args.putString("reminderName", reminderListFiltered.get(getAdapterPosition()).getReminderName());
                     args.putString("reminderImage", reminderListFiltered.get(getAdapterPosition()).getReminderImage());
                     args.putString("reminderBirthdayDate", reminderListFiltered.get(getAdapterPosition()).getReminderBirthdayDate());
-                    args.putString("reminderNotificationDate", reminderListFiltered.get(getAdapterPosition()).getNotificationDate());
+
+
+                    Calendar notificationDateFromArgs = Calendar.getInstance();
+                    notificationDateFromArgs.setTimeInMillis(reminderListFiltered.get(getAdapterPosition()).getNotificationDateInMillis());
+
+                    String formattedNotificationDate = String.format(Locale.ENGLISH, "%02d-%02d-%d",
+                            notificationDateFromArgs.get(Calendar.DAY_OF_MONTH),
+                            (notificationDateFromArgs.get(Calendar.MONTH) + 1),
+                            notificationDateFromArgs.get(Calendar.YEAR) );
+
+
+                    Log.d("reminderInfoDate", "date to args:" + formattedNotificationDate);
+
+                    args.putLong("reminderNotificationDateInMillis", reminderListFiltered.get(getAdapterPosition()).getNotificationDateInMillis());
                     args.putInt("reminderId", reminderListFiltered.get(getAdapterPosition()).get_reminderId());
 
                     Navigation.findNavController(Objects.requireNonNull(view))
@@ -87,9 +103,14 @@ public class MainScreenRemindersAdapter extends RecyclerView.Adapter<MainScreenR
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
         final Reminder reminder = reminderListFiltered.get(position);
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(reminder.getNotificationDateInMillis());
+        String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", c.get(Calendar.DAY_OF_MONTH), (c.get(Calendar.MONTH) + 1),c.get(Calendar.YEAR) );
+
         holder.selectedReminderName.setText(reminder.getReminderName());
-        holder.selectedReminderBirthdayDate.setText(String.format("%s%s%s", context.getString(R.string.Birthday),": ", reminder.getReminderBirthdayDate()));
-        holder.selectedReminderNotificationDate.setText(String.format("%s%s%s",context.getString(R.string.NotificationDatenotification), ": ", reminder.getNotificationDate()));
+        holder.selectedReminderBirthdayDate.setText(String.format("%s%s%s", context.getString(R.string.birthday),": ", reminder.getReminderBirthdayDate()));
+        holder.selectedReminderNotificationDate.setText(String.format("%s: %s", context.getString(R.string.date_of_reminder), formattedDate));
         String imagePath = reminder.getReminderImage();
         Glide.with(context)
                 .load(imagePath)

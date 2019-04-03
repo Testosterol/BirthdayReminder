@@ -8,23 +8,18 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
-                  <entry key="createNotificationFragment">
+                  <entry key="createReminderFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="48" />
-                            <option name="y" value="-134" />
+                            <option name="x" value="-281" />
+                            <option name="y" value="-363" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_createNotificationFragment_to_mainFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_createNotificationFragment_to_settingsFragment">
+                            <entry key="action_createReminderFragment_to_settingsFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -39,18 +34,18 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="-443" />
-                            <option name="y" value="-538" />
+                            <option name="x" value="-702" />
+                            <option name="y" value="-294" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_mainFragment_to_createNotificationFragment">
+                            <entry key="action_mainFragment_to_createReminderFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_mainFragment_to_notificationInfo">
+                            <entry key="action_mainFragment_to_reminderInfo">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -65,23 +60,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="notificationInfo">
+                  <entry key="reminderInfo">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="42" />
-                            <option name="y" value="-1032" />
+                            <option name="x" value="-309" />
+                            <option name="y" value="-38" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_notificationInfo_to_mainFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_notificationInfo_to_settingsFragment">
+                            <entry key="action_reminderInfo_to_settingsFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -96,8 +86,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="479" />
-                            <option name="y" value="-568" />
+                            <option name="x" value="-83" />
+                            <option name="y" value="-713" />
                           </Point>
                         </option>
                       </LayoutPositions>

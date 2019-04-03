@@ -9,4 +9,5 @@
     <dimen name="contact_number">12dp</dimen>
     <dimen name="ic_delete">40dp</dimen>
     <dimen name="padding_10">10dp</dimen>
+    <dimen name="padding_15">15dp</dimen>
 </resources>

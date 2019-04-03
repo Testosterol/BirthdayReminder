@@ -25,8 +25,8 @@
     <string name="action_search">Search</string>
     <string name="search_hint">Type name…</string>
     <string name="app_name">Birthday Reminder</string>
-    <string name="Birthday">Birthday</string>
-    <string name="NotificationDatenotification">Date of reminder</string>
+    <string name="birthday">Birthday</string>
+    <string name="date_of_reminder">Date of reminder</string>
     <string name="ChangePicture">Change picture</string>
     <string name="save_reminder">Save</string>
     <string name="reset">Reset</string>
@@ -38,6 +38,5 @@
     <string name="permission_phone_rationale_write_external_storage">Please enable storage permission to show change an image</string>
     <string name="permission_phone_write_external_storage_toast">permission required to load an image</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

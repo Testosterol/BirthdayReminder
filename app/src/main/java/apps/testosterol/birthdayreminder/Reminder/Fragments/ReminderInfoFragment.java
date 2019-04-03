@@ -4,10 +4,8 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -39,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import androidx.navigation.Navigation;
 import apps.testosterol.birthdayreminder.Database.ReminderDatabase;
 import apps.testosterol.birthdayreminder.R;
-import apps.testosterol.birthdayreminder.Reminder.Reminder;
 import apps.testosterol.birthdayreminder.Util.Util;
 
 import static apps.testosterol.birthdayreminder.Util.Util.dpToPx;
@@ -64,7 +61,6 @@ public class ReminderInfoFragment extends Fragment {
 
     EditText name, birthday, notificationDate;
     ImageView profilePicture;
-    Reminder reminder;
     Integer id;
     int mYear, mMonth, mDay;
     String path;
@@ -73,7 +69,10 @@ public class ReminderInfoFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private String reminderName, reminderImage, reminderBirthdayDate, reminderNotificationDate;
+    private String reminderName;
+    private String reminderImage;
+    private String reminderBirthdayDate;
+    private long reminderNotificationDateInMillis;
     private boolean reminderEventEmail;
     private int reminderId;
 
@@ -116,7 +115,7 @@ public class ReminderInfoFragment extends Fragment {
             reminderName = getArguments().getString("reminderName");
             reminderImage = getArguments().getString("reminderImage");
             reminderBirthdayDate = getArguments().getString("reminderBirthdayDate");
-            reminderNotificationDate = getArguments().getString("reminderNotificationDate");
+            reminderNotificationDateInMillis = getArguments().getLong("reminderNotificationDateInMillis", 0);
             reminderEventEmail = getArguments().getBoolean("reminderEventEmail");
             reminderId = getArguments().getInt("reminderId");
         }
@@ -144,8 +143,7 @@ public class ReminderInfoFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(Objects.requireNonNull(getView()))
-                        .navigate(R.id.action_reminderInfo_to_mainFragment);
+                Navigation.findNavController(Objects.requireNonNull(getView())).popBackStack();
             }
         });
 
@@ -159,8 +157,18 @@ public class ReminderInfoFragment extends Fragment {
         notificationDate = view.findViewById(R.id.notificationDate);
 
         name.setText(reminderName);
-        birthday.setText(reminderBirthdayDate);
-        notificationDate.setText(reminderNotificationDate);
+        birthday.setText(String.format("Birthday date: %s", reminderBirthdayDate));
+
+        Calendar notificationDateFromArgs = Calendar.getInstance();
+        notificationDateFromArgs.setTimeInMillis(reminderNotificationDateInMillis);
+
+        String formattedNotificationDate = String.format(Locale.ENGLISH, "%02d-%02d-%d",
+                notificationDateFromArgs.get(Calendar.DAY_OF_MONTH),
+                (notificationDateFromArgs.get(Calendar.MONTH) + 1),
+                notificationDateFromArgs.get(Calendar.YEAR) );
+
+        notificationDate.setText(String.format("Reminder date: %s", formattedNotificationDate));
+
         id = reminderId;
 
         String imagePath = reminderImage;
@@ -191,8 +199,8 @@ public class ReminderInfoFragment extends Fragment {
                             @Override
                             public void onDateSet(DatePicker view, int year,
                                                   int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", dayOfMonth, (monthOfYear + 1),year );
-                                notificationDate.setText(formattedDate);
+
+
                                 setNewNotification(year, monthOfYear, dayOfMonth);
                             }
                         }, mYear, mMonth, mDay);
@@ -217,6 +225,8 @@ public class ReminderInfoFragment extends Fragment {
                                 String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", dayOfMonth, (monthOfYear + 1),year );
                                 birthday.setText(formattedDate);
 
+                                // todo: update date in database - calculate new reminder ?
+
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
@@ -233,9 +243,10 @@ public class ReminderInfoFragment extends Fragment {
 
     private void setNewNotification(int year, int month, int day) {
         Calendar todayDate = Calendar.getInstance();
-        Calendar notificationDate = Calendar.getInstance();
-        notificationDate.set(year, month, day);
-        long dateOfNotificationMillis = notificationDate.getTimeInMillis();
+        Calendar notificationDateCalendar = Calendar.getInstance();
+        notificationDateCalendar.set(year, month, day);
+
+        long dateOfNotificationMillis = notificationDateCalendar.getTimeInMillis();
         long todayDateMillis = todayDate.getTimeInMillis();
         long dateDifferenceInMillis = dateOfNotificationMillis - todayDateMillis;
         long notificationDelayInDays = TimeUnit.MILLISECONDS.toDays(dateDifferenceInMillis);
@@ -245,6 +256,12 @@ public class ReminderInfoFragment extends Fragment {
             toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dpToPx(70));
             toast.show();
         }else{
+
+            Util.rescheduleAlarmToUsersSpecificDate(Objects.requireNonNull(getContext()), notificationDateCalendar, id);
+
+            String formattedDate = String.format(Locale.ENGLISH, "%02d-%02d-%d", day, (month + 1),year );
+            notificationDate.setText(formattedDate);
+
             //hm todo: reschedule reminder based on id
         }
     }
@@ -266,32 +283,17 @@ public class ReminderInfoFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Uri selectedImage = data.getData();
-        path = getPath(selectedImage);
-        Glide.with(this)
-                .load(path)
-                .apply(RequestOptions.circleCropTransform())
-                .into(profilePicture);
+        if(data != null) {
+            Uri selectedImage = data.getData();
+            path = Util.getPathToImageFromUri(selectedImage, getContext());
+            Glide.with(this)
+                    .load(path)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(profilePicture);
 
-        Log.d("KarolTest", "remidner id: " + reminderId);
-        ReminderDatabase.getInstance(getActivity()).daoAccess().updateReminderImage(reminderId, path);
-        //sotre into db
-    }
-
-    public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = Objects.requireNonNull(getActivity()).getContentResolver().query(uri, projection, null,null,null);
-        int column_index;
-        if (cursor != null) {
-            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            String path = cursor.getString(column_index);
-            cursor.close();
-            return path;
+            ReminderDatabase.getInstance(getActivity()).daoAccess().updateReminderImage(reminderId, path);
         }
-        return "";
     }
-
 
     @Override
     public void onAttach(Context context) {

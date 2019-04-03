@@ -4,10 +4,8 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -27,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -69,8 +66,7 @@ public class CreateReminderFragment extends Fragment {
     private static final int IMG_RESULT = 1;
 
     EditText birthDay, name;
-    Button addReminder, random;
-    FloatingActionButton add, addNotification;
+    FloatingActionButton addNotification;
 
     String path;
 
@@ -141,15 +137,11 @@ public class CreateReminderFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(Objects.requireNonNull(getView()))
-                        .navigate(R.id.action_createReminderFragment_to_mainFragment);
+                Navigation.findNavController(Objects.requireNonNull(getView())).popBackStack();
             }
         });
 
         this.createReminderFragmentView = view;
-       /* Objects.requireNonNull(((AppCompatActivity) getActivity()).getSupportActionBar()).setBackgroundDrawable(new ColorDrawable(Color.BLACK));
-        Objects.requireNonNull(((AppCompatActivity) getActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(false);*/
-
         setHasOptionsMenu(true);
 
         Util.dontCoverTopOfTheScreenWithApp(view, getActivity());
@@ -157,6 +149,11 @@ public class CreateReminderFragment extends Fragment {
         profilePicture = view.findViewById(R.id.profilePicture);
 
         path = Util.getURLForResource(R.drawable.birtdhaycake);
+
+        Glide.with(Objects.requireNonNull(getContext()))
+                .load(path)
+                .apply(RequestOptions.circleCropTransform())
+                .into(profilePicture);
 
         birthDay = (view.findViewById(R.id.birthdaydate));
         name = (view.findViewById(R.id.name));
@@ -231,14 +228,9 @@ public class CreateReminderFragment extends Fragment {
         profilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 getUserImage();
             }
         });
-    }
-
-    public String getImagePath(){
-        return path;
     }
 
     private void getUserImage(){
@@ -258,30 +250,18 @@ public class CreateReminderFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Uri selectedImage = data.getData();
-        path = getPath(selectedImage);
-        Glide.with(this)
-                .load(path)
-                .apply(RequestOptions.circleCropTransform())
-                .into(profilePicture);
+        if(data != null) {
+            Uri selectedImage = data.getData();
+            path = Util.getPathToImageFromUri(selectedImage, getContext());
+            Glide.with(this)
+                    .load(path)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(profilePicture);
 
-        //Log.d("KarolTest", "remidner id: " + reminderId);
-        //ReminderDatabase.getInstance(getActivity()).daoAccess().updateReminderImage(reminderId, path);
-        //sotre into db
-    }
-
-    public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = Objects.requireNonNull(getActivity()).getContentResolver().query(uri, projection, null,null,null);
-        int column_index;
-        if (cursor != null) {
-            column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            String path = cursor.getString(column_index);
-            cursor.close();
-            return path;
+            //Log.d("KarolTest", "remidner id: " + reminderId);
+            //ReminderDatabase.getInstance(getActivity()).daoAccess().updateReminderImage(reminderId, path);
+            //sotre into db
         }
-        return "";
     }
 
     @Override

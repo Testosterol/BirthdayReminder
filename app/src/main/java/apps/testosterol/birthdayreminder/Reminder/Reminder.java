@@ -15,7 +15,7 @@ public class Reminder implements Serializable {
     private  Integer _reminderId;
 
     @ColumnInfo(name = "notification_date")
-    private String notificationDate;
+    private long notificationDateInMillis;
 
     @ColumnInfo(name = "reminder_name")
     private String reminderName;
@@ -28,53 +28,39 @@ public class Reminder implements Serializable {
 
     public Reminder(){}
 
-    Reminder(String reminderImage, String notificationDate, String remindantName, String reminderBirthdayDate){
+    // Constructor
+    public Reminder(String reminderImage, long notificationDate, String remindantName, String reminderBirthdayDate){
         this.reminderImage = reminderImage;
-        this.notificationDate = notificationDate;
+        this.notificationDateInMillis = notificationDate;
         this.reminderBirthdayDate = reminderBirthdayDate;
         this.reminderName = remindantName;
     }
 
+    // Setters
     public void set_reminderId(@NonNull Integer _reminderId) {
         this._reminderId = _reminderId;
     }
-
     public void setReminderName(String reminderName) {
         this.reminderName = reminderName;
     }
+    public void setReminderBirthdayDate(String reminderBirthdayDate) { this.reminderBirthdayDate = reminderBirthdayDate; }
+    public void setReminderImage(String reminderImage) { this.reminderImage = reminderImage; }
+    public void setNotificationDateInMillis(long reminderBirthdayDate) { this.notificationDateInMillis = reminderBirthdayDate; }
 
-    public void setReminderBirthdayDate(String reminderBirthdayDate) {
-        this.reminderBirthdayDate = reminderBirthdayDate;
-    }
-
-    public void setReminderImage(String reminderImage) {
-        this.reminderImage = reminderImage;
-    }
-
-    public void setNotificationDate(String reminderBirthdayDate) {
-        this.notificationDate = reminderBirthdayDate;
-    }
-
-
+    // Getters
     @NonNull
     public Integer get_reminderId() {
         return _reminderId;
     }
-
-    public String getNotificationDate(){
-        return notificationDate;
-    }
-
+    public long getNotificationDateInMillis(){ return notificationDateInMillis; }
     public String getReminderName() {
         return reminderName;
     }
-
     public String getReminderBirthdayDate() {
         return reminderBirthdayDate;
     }
+    public String getReminderImage() { return reminderImage; }
 
-    public String getReminderImage() {
-        return reminderImage;
-    }
+
 
 }

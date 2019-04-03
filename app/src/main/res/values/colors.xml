@@ -2,8 +2,10 @@
 <resources>
     <color name="colorPrimary">#111111</color>
     <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorPrimaryDarkWhite">#FFF</color>
     <color name="colorAccent">#ea3732</color>
     <color name="contact_name">#333333</color>
     <color name="contact_number">#8c8c8c</color>
     <color name="bg_row_background">#fa315b</color>
+    <color name="background">#FF0000</color>
 </resources>
