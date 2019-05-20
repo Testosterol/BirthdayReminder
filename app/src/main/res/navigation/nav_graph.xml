@@ -16,6 +16,7 @@
             app:destination="@id/settingsFragment"
             app:popUpTo="@+id/createReminderFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/reminderInfo"
         android:name="apps.testosterol.birthdayreminder.Reminder.Fragments.ReminderInfoFragment"
@@ -26,6 +27,7 @@
             app:destination="@id/settingsFragment"
             app:popUpTo="@id/reminderInfo" />
     </fragment>
+
     <fragment
         android:id="@+id/mainFragment"
         android:name="apps.testosterol.birthdayreminder.Main.MainFragment"
@@ -45,6 +47,7 @@
             app:destination="@id/settingsFragment"
             app:popUpTo="@+id/mainFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/settingsFragment"
         android:name="apps.testosterol.birthdayreminder.SettingsFragment"

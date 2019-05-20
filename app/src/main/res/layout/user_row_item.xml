@@ -15,8 +15,9 @@
         android:id="@+id/view_background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/bg_row_background"
         android:padding="16dp">
+        <!--android:background="@color/bg_row_background"-->
+
 
         <ImageView
             android:id="@+id/delete_icon"

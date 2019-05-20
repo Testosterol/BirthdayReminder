@@ -3,6 +3,8 @@ package apps.testosterol.birthdayreminder.Main;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -32,14 +34,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.navigation.Navigation;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Objects;
 
-import androidx.navigation.Navigation;
 import apps.testosterol.birthdayreminder.BroadcastReceiver.AlarmWakeUpBroadcastReceiver;
 import apps.testosterol.birthdayreminder.Database.ReminderDatabase;
 import apps.testosterol.birthdayreminder.R;
@@ -48,6 +51,7 @@ import apps.testosterol.birthdayreminder.Reminder.Reminder;
 import apps.testosterol.birthdayreminder.Util.MyDividerItemDecoration;
 import apps.testosterol.birthdayreminder.Util.RecyclerItemTouchHelper;
 import apps.testosterol.birthdayreminder.Util.Util;
+import apps.testosterol.birthdayreminder.ViewModel.ReminderViewModel;
 
 import static android.widget.Toast.makeText;
 
@@ -68,15 +72,15 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
     private static final String ARG_PARAM2 = "param2";
     private static final String CHANNEL_ID = "notifications";
 
-    Button addReminder, random;
     Animation fab_open, fab_close;
     boolean isFabOpen = false;
     FloatingActionButton add;
     RecyclerView allRemindersRecyclerView;
-    ArrayList<Reminder> allRemindersList = new ArrayList<>();
+    List<Reminder> allRemindersList = new ArrayList<>();
     private MainScreenRemindersAdapter mainScreenAdapter;
     private ConstraintLayout constraintLayout;
     private View mainFragmentView;
+    private ReminderViewModel reminderViewModel;
 
     private OnFragmentInteractionListener mListener;
 
@@ -112,31 +116,6 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
         }
     }
 
-    private void openMenu() {
-        addReminder.setScaleX(1f);
-        addReminder.setScaleY(1f);
-        random.setScaleX(1f);
-        random.setScaleY(1f);
-        addReminder.setVisibility(View.VISIBLE);
-        random.setVisibility(View.VISIBLE);
-        if (isFabOpen) {
-            addReminder.startAnimation(fab_close);
-            random.startAnimation(fab_close);
-            addReminder.setClickable(false);
-            random.setClickable(false);
-            isFabOpen = false;
-            add.animate().rotation(0);
-        } else {
-            addReminder.startAnimation(fab_open);
-            random.startAnimation(fab_open);
-            addReminder.setClickable(true);
-            random.setClickable(true);
-            isFabOpen = true;
-            add.animate().rotation(45);
-        }
-    }
-
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -166,36 +145,17 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
         }
 
         add = view.findViewById(R.id.Add);
-        addReminder = view.findViewById(R.id.AddReminder);
-        random = view.findViewById(R.id.RandomButton);
-
-        addReminder.setVisibility(View.INVISIBLE);
-        random.setVisibility(View.INVISIBLE);
-
         fab_open = AnimationUtils.loadAnimation(getContext(), R.anim.add_open);
         fab_close = AnimationUtils.loadAnimation(getContext(), R.anim.add_close);
 
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openMenu();
-            }
-        });
-
-        addReminder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
                 Navigation.findNavController(Objects.requireNonNull(getView()))
                         .navigate(R.id.action_mainFragment_to_createReminderFragment);
             }
         });
 
-        random.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
 
         allRemindersRecyclerView = view.findViewById(R.id.recycler_view);
         allRemindersList = new ArrayList<>();
@@ -210,7 +170,8 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
         allRemindersRecyclerView.setAdapter(mainScreenAdapter);
 
         allRemindersList.clear();
-        allRemindersList.addAll(ReminderDatabase.getInstance(getContext()).daoAccess().fetchAllNotifications());
+
+        allRemindersList.addAll(ReminderDatabase.getInstance(getContext()).daoAccess().getAllReminders());
 
         // refreshing recycler view
         mainScreenAdapter.notifyDataSetChanged();
@@ -219,6 +180,16 @@ public class MainFragment extends Fragment implements MainScreenRemindersAdapter
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(allRemindersRecyclerView);
+
+        reminderViewModel = ViewModelProviders.of(this).get(ReminderViewModel.class);
+
+        reminderViewModel.getAllReminders().observe(getActivity(), new Observer<List<Reminder>>() {
+            @Override
+            public void onChanged(@Nullable List<Reminder> reminders) {
+                mainScreenAdapter.setMessages(reminders);
+            }
+        });
+
 
 
     }

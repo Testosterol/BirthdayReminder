@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
+import apps.testosterol.birthdayreminder.Database.ReminderDatabase;
 import apps.testosterol.birthdayreminder.R;
 import apps.testosterol.birthdayreminder.Reminder.Fragments.CreateReminderFragment;
 import apps.testosterol.birthdayreminder.Reminder.Fragments.ReminderInfoFragment;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnFr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ReminderDatabase.createDatabase(this);
     }
 
     @Override

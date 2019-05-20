@@ -1,5 +1,6 @@
 package apps.testosterol.birthdayreminder.Database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -30,7 +31,10 @@ public interface DaoAccess {
      * RETREIVE
      */
     @Query("SELECT * FROM Reminder")
-    List<Reminder> fetchAllNotifications();
+    LiveData<List<Reminder>> fetchAllNotifications();
+
+    @Query("SELECT * FROM REMINDER")
+    List<Reminder> getAllReminders();
 
     @Query("SELECT reminder_image FROM reminder WHERE _reminderId = :reminderId")
     String getReminderImageFromDatabase(long reminderId);

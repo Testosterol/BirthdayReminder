@@ -6,7 +6,9 @@ import android.support.annotation.NonNull;
 
 /*
  * Denis created this class on the 02/04/2019
- */public class ReminderIdNotificationDateTuple {
+ */
+
+public class ReminderIdNotificationDateTuple {
 
     @PrimaryKey(autoGenerate = true)
     @NonNull

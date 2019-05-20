@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.navigation.Navigation;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -23,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import androidx.navigation.Navigation;
 import apps.testosterol.birthdayreminder.R;
 import apps.testosterol.birthdayreminder.Reminder.Reminder;
 
@@ -99,6 +100,13 @@ public class MainScreenRemindersAdapter extends RecyclerView.Adapter<MainScreenR
 
         return new MyViewHolder(itemView);
     }
+
+    public void setMessages(List<Reminder> reminders){
+        this.reminderList = reminders;
+        this.reminderListFiltered = reminders;
+        notifyDataSetChanged();
+    }
+
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {

@@ -1,0 +1,82 @@
+ext.deps = [:]
+
+def versions = [:]
+versions.support = "28.0.0"
+versions.constraint_layout = "1.1.3"
+versions.test_runner = "1.0.2"
+versions.espresso = "3.0.2"
+versions.navigation = "1.0.0"
+versions.room = "1.1.1"
+versions.room_compiler = "1.1.1"
+versions.lifecycle_livedata = "1.1.1"
+versions.lifecycle_extensions = "1.1.1"
+versions.lifecycle_compiler = "1.1.1"
+versions.paging = "1.0.1"
+versions.junit = "4.12"
+versions.glide = "4.8.0"
+versions.gradle_tools = "3.4.1"
+versions.afollestad_dialogs = "0.9.6.0"
+versions.gson = "2.8.5"
+
+def support = [:]
+support.app_compat = "com.android.support:appcompat-v7:$versions.support"
+support.recycler_view = "com.android.support:recyclerview-v7:$versions.support"
+support.design = "com.android.support:design:$versions.support"
+support.card_view =  "com.android.support:cardview-v7:$versions.support"
+support.support = "com.android.support:support-v4:$versions.support"
+support.constraint_layout = "com.android.support.constraint:constraint-layout:$versions.constraint_layout"
+support.test_runner = "com.android.support.test:runner:$versions.test_runner"
+support.espresso = "com.android.support.test.espresso:espresso-core:$versions.espresso"
+deps.support = support
+
+def arch = [:]
+arch.navigation = "android.arch.navigation:navigation-fragment:$versions.navigation"
+arch.room = "android.arch.persistence.room:runtime:$versions.room"
+arch.room_compiler = "android.arch.persistence.room:compiler:$versions.room_compiler"
+arch.lifecycle_livedata = "android.arch.lifecycle:livedata-core:$versions.lifecycle_livedata"
+arch.lifecycle_extensions = "android.arch.lifecycle:extensions:$versions.lifecycle_extensions"
+arch.lifecycle_compiler = "android.arch.lifecycle:compiler:$versions.lifecycle_compiler"
+arch.paging = "android.arch.paging:runtime:$versions.paging"
+deps.arch = arch
+
+def testing = [:]
+testing.junit = "junit:junit:$versions.junit"
+deps.testing = testing
+
+def external = [:]
+external.glide = "com.github.bumptech.glide:glide:$versions.glide"
+external.dialogs = "com.afollestad.material-dialogs:core:$versions.afollestad_dialogs"
+deps.external = external
+
+def google = [:]
+google.gson = "com.google.code.gson:gson:$versions.gson"
+deps.google = google
+
+def android_gradle_plugin = [:]
+android_gradle_plugin.build_tools = "com.android.tools.build:gradle:$versions.gradle_tools"
+deps.android_gradle_plugin = android_gradle_plugin
+
+def build_versions = [:]
+build_versions.min_sdk = 19
+build_versions.target_sdk = 28
+build_versions.compiled_sdk = 28
+
+ext.build_versions = build_versions
+
+
+static def addReposProject(RepositoryHandler handler){
+    handler. maven {
+        url "https://maven.google.com" // Google's Maven repository
+    }
+    handler.jcenter()
+}
+ext.addReposProject = this.&addReposProject
+
+static def addReposAllProjects(RepositoryHandler handler){
+    handler. maven {
+        url "https://maven.google.com" // Google's Maven repository
+    }
+    handler.jcenter()
+}
+ext.addReposAllProjects = this.&addReposAllProjects
+

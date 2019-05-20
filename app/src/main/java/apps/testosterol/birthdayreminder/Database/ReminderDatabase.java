@@ -10,18 +10,34 @@ import apps.testosterol.birthdayreminder.Reminder.Reminder;
 @Database(entities = {Reminder.class}, version = 1, exportSchema = false)
 public abstract class ReminderDatabase extends RoomDatabase {
 
-    private static ReminderDatabase instance;
+    private static final String DATABASE_NAME = "reminder_db";
 
-    public static ReminderDatabase getInstance(Context context){
+    private static ReminderDatabase instance;
+    public abstract DaoAccess daoAccess() ;
+
+    public synchronized static ReminderDatabase getInstance(Context context) {
+        if (instance == null) {
+            instance = createReminderDatabaseInstance(context);
+        }
+        return instance;
+    }
+
+    public synchronized static void createDatabase(Context context) {
+        if (instance == null) {
+            instance = createReminderDatabaseInstance(context);
+        }
+    }
+
+    private static ReminderDatabase createReminderDatabaseInstance(Context context){
         if(instance == null){
-            instance = Room.databaseBuilder(context, ReminderDatabase.class, "reminderdb")
+            instance = Room.databaseBuilder(context, ReminderDatabase.class, DATABASE_NAME)
                     .allowMainThreadQueries()
                     .build();
             }
             return instance;
         }
 
-    public abstract DaoAccess daoAccess() ;
+
 
 }
 
